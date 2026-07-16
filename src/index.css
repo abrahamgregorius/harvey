@@ -1,1 +1,42 @@
-/* MUI handles all styles */
+@import "tailwindcss";
+
+@theme {
+  --color-cream: #FAF8F5;
+  --color-forest: #1B4332;
+  --color-forest-mid: #2D6A4F;
+  --color-sage: #74A892;
+  --color-gold: #C9A84C;
+  --color-warm-gray: #6B7280;
+  --color-dark-gray: #111827;
+  --color-border: #E5E0D8;
+  --color-card-bg: #FFFFFF;
+  --color-soft-green: #D8EAE3;
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: #FAF8F5;
+  color: #111827;
+  overflow-x: hidden;
+}
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #FAF8F5; }
+::-webkit-scrollbar-thumb { background: #E5E0D8; border-radius: 3px; }
+::selection { background: #D8EAE3; }
+
+.fade-up {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.7s cubic-bezier(0.22, 0.61, 0.36, 1),
+              transform 0.7s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.fade-up.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
