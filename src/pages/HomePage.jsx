@@ -8,6 +8,7 @@ import WbSunnyIcon from '@mui/icons-material/WbSunny'
 import WaterDropIcon from '@mui/icons-material/WaterDrop'
 import { Link } from 'react-router-dom'
 import { getGrowthStage } from '../utils/growthUtils'
+import { WeatherTrendsChart } from '../components/WeatherTrendsChart'
 
 export { getGrowthStage }
 
@@ -163,6 +164,12 @@ export function HomePage({ fields, onDelete }) {
                     <GrowthCard fields={fields} />
                 </Box>
             </Box>
+
+            {fields.length > 0 && (
+                <Box sx={{ px: 2, pb: 2 }}>
+                    <WeatherTrendsChart fields={fields} />
+                </Box>
+            )}
 
             <Paper sx={{
                 mx: 2, mb: 2,

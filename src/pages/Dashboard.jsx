@@ -14,7 +14,7 @@ import LeaderboardIcon from '@mui/icons-material/Leaderboard'
 import { getFields, deleteField } from '../services/fieldStore.js'
 import { HomePage } from './HomePage.jsx'
 import { FieldsPage } from './FieldsPage.jsx'
-import { WaterAllocationPage } from './WaterAllocationPage.jsx'
+import { WaterAllocationPage, calcRiskScore } from './WaterAllocationPage.jsx'
 import { AnalyticsPage } from './AnalyticsPage.jsx'
 
 const theme = createTheme({
@@ -116,7 +116,7 @@ function Sidebar({ page, setPage }) {
             <Box sx={{ px: 1.5, py: 2, borderTop: '1px solid', borderColor: 'divider' }}>
                 <Button
                     component={Link}
-                    to="/"
+                    to="/app"
                     startIcon={<MapAltIcon sx={{ fontSize: 20 }} />}
                     sx={{
                         justifyContent: 'flex-start',
@@ -141,6 +141,7 @@ export default function Dashboard() {
     const [fields, setFields] = useState([])
     const [loading, setLoading] = useState(true)
     const [page, setPage] = useState('home')
+    const avgRisk = fields.length > 0 ? Math.round(fields.reduce((s, f) => s + calcRiskScore(f), 0) / fields.length) : null
 
     useEffect(() => {
         getFields().then(data => { setFields(data) }).catch(console.error).finally(() => setLoading(false))
@@ -177,6 +178,33 @@ export default function Dashboard() {
                         <Typography variant="caption" sx={{ color: 'text.secondary' }}>
                             {fields.length} lahan · {new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
                         </Typography>
+                        {avgRisk !== null && (
+                            <Stack direction="row" spacing={1} alignItems="center" sx={{ ml: 3 }}>
+                                <Box sx={{ position: 'relative', display: 'inline-flex' }}>
+                                    <CircularProgress
+                                        variant="determinate"
+                                        value={100}
+                                        size={36}
+                                        thickness={5}
+                                        sx={{ color: 'rgba(0,0,0,0.1)', position: 'absolute' }}
+                                    />
+                                    <CircularProgress
+                                        variant="determinate"
+                                        value={avgRisk}
+                                        size={36}
+                                        thickness={5}
+                                        sx={{ color: avgRisk >= 70 ? '#ef4444' : avgRisk >= 50 ? '#f97316' : avgRisk >= 30 ? '#eab308' : '#22c55e', '& .MuiCircularProgress-circle': { strokeLinecap: 'round' } }}
+                                    />
+                                    <Box sx={{ top: 0, left: 0, bottom: 0, right: 0, position: 'absolute', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                        <Typography variant="caption" fontWeight={800} sx={{ fontSize: 10 }}>{avgRisk}</Typography>
+                                    </Box>
+                                </Box>
+                                <Box>
+                                    <Typography variant="caption" fontWeight={700} sx={{ display: 'block', lineHeight: 1.1 }}>Harvey Score</Typography>
+                                    <Typography variant="caption" color="text.secondary" sx={{ fontSize: 10 }}>Rata-rata</Typography>
+                                </Box>
+                            </Stack>
+                        )}
                     </Box>
 
                     <Box sx={{ flex: 1, overflow: 'auto', minHeight: 0 }}>
