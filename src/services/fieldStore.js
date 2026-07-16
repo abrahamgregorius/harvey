@@ -20,3 +20,13 @@ export async function deleteField(id) {
     const res = await fetch(`${API}/${id}`, { method: 'DELETE' })
     if (!res.ok) throw new Error(`deleteField failed: ${res.status}`)
 }
+
+export async function updateField(id, field) {
+    const res = await fetch(`${API}/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(field)
+    })
+    if (!res.ok) throw new Error(`updateField failed: ${res.status}`)
+    return res.json()
+}

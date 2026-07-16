@@ -36,6 +36,7 @@ import UndoIcon from '@mui/icons-material/Undo'
 import CheckIcon from '@mui/icons-material/Check'
 import ClearIcon from '@mui/icons-material/Clear'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
+import EditIcon from '@mui/icons-material/Edit'
 import MyLocationIcon from '@mui/icons-material/MyLocation'
 import LayersIcon from '@mui/icons-material/Layers'
 import DashboardIcon from '@mui/icons-material/Dashboard'
@@ -44,7 +45,7 @@ import { calcPolygonAreaHectares, getPolygonCentroid } from '../services/geoServ
 import { getWeatherSummary } from '../services/weatherService.js'
 import { getSoilSummary } from '../services/soilService.js'
 import { getLast30DaysRainfall } from '../services/rainfallService.js'
-import { storeField, getFields } from '../services/fieldStore.js'
+import { storeField, getFields, updateField } from '../services/fieldStore.js'
 
 import L from 'leaflet'
 delete L.Icon.Default.prototype._getIconUrl
@@ -137,7 +138,7 @@ function StatCard({ icon, label, value, unit = '', highlight = false }) {
 }
 
 // ── Field panel ──────────────────────────────────────────────────────────────
-function FieldPanel({ fields }) {
+function FieldPanel({ fields, onEdit }) {
     const [collapsed, setCollapsed] = useState(new Set())
     const toggle = (idx) => {
         setCollapsed(prev => {
@@ -163,7 +164,10 @@ function FieldPanel({ fields }) {
                             <Typography variant="subtitle2" fontWeight={700} className="text-white flex-1">
                                 {field.name}
                             </Typography>
-                            <IconButton size="small" className={`text-white transition-transform ${isCollapsed ? '' : 'rotate-180'}`}>
+                            <IconButton size="small" className="text-white" onClick={e => { e.stopPropagation(); onEdit(field) }}>
+                                <EditIcon fontSize="small" />
+                            </IconButton>
+                            <IconButton size="small" className={`text-white transition-transform ${isCollapsed ? '' : 'rotate-180'}`} onClick={e => { e.stopPropagation(); toggle(idx) }}>
                                 <ExpandMoreIcon fontSize="small" />
                             </IconButton>
                         </Box>
@@ -277,6 +281,7 @@ export default function Home() {
     const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'info' })
     const [fieldForm, setFieldForm] = useState({ name: '', plantingDate: '' })
     const [showFieldModal, setShowFieldModal] = useState(false)
+    const [editField, setEditField] = useState(null)
     const nameInputRef = useRef(null)
 
     useEffect(() => {
@@ -301,6 +306,25 @@ export default function Home() {
     }
 
     const handleModalClose = () => setShowFieldModal(false)
+
+    const handleEditOpen = (field) => {
+        setEditField({ ...field })
+    }
+
+    const handleEditSave = async () => {
+        if (!editField?.name?.trim()) {
+            showMsg('Nama lahan wajib diisi', 'warning')
+            return
+        }
+        try {
+            const updated = await updateField(editField.id, editField)
+            setFields(prev => prev.map(f => f.id === updated.id ? updated : f))
+            setEditField(null)
+            showMsg('Lahan diperbarui', 'success')
+        } catch (e) {
+            showMsg(`Gagal: ${e.message}`, 'error')
+        }
+    }
 
     useEffect(() => {
         getFields().then(data => {
@@ -486,7 +510,7 @@ export default function Home() {
                                     <Typography variant="body2" color="text.secondary">Memuat data…</Typography>
                                 </Paper>
                             ) : (
-                                <FieldPanel fields={fields} />
+                                <FieldPanel fields={fields} onEdit={handleEditOpen} />
                             )}
                             {fields.length === 0 && !loading && (
                                 <Box className="mt-3 p-6 border-2 border-dashed border-gray-300 rounded-2xl text-center">
@@ -542,6 +566,36 @@ export default function Home() {
                     <DialogActions className="px-4 pb-3">
                         <Button onClick={handleModalClose} color="inherit" size="small">Batal</Button>
                         <Button onClick={handleModalConfirm} variant="contained" size="small">OK</Button>
+                    </DialogActions>
+                </Dialog>
+
+                {/* Edit field modal */}
+                <Dialog open={!!editField} onClose={() => setEditField(null)} maxWidth="xs" fullWidth>
+                    <DialogTitle fontWeight={700}>Edit Lahan</DialogTitle>
+                    <DialogContent>
+                        <Stack spacing={2} mt={1}>
+                            <TextField
+                                label="Nama Lahan"
+                                value={editField?.name ?? ''}
+                                onChange={e => setEditField(f => ({ ...f, name: e.target.value }))}
+                                onKeyDown={e => e.key === 'Enter' && handleEditSave()}
+                                fullWidth size="small"
+                            />
+                            <FormControl variant="outlined" size="small" fullWidth>
+                                <InputLabel shrink htmlFor="edit-planting-date">Tanggal Tanam</InputLabel>
+                                <OutlinedInput
+                                    id="edit-planting-date"
+                                    type="date"
+                                    value={editField?.plantingDate ?? ''}
+                                    onChange={e => setEditField(f => ({ ...f, plantingDate: e.target.value }))}
+                                    label="Tanggal Tanam"
+                                />
+                            </FormControl>
+                        </Stack>
+                    </DialogContent>
+                    <DialogActions className="px-4 pb-3">
+                        <Button onClick={() => setEditField(null)} color="inherit" size="small">Batal</Button>
+                        <Button onClick={handleEditSave} variant="contained" size="small">Simpan</Button>
                     </DialogActions>
                 </Dialog>
             </Box>
