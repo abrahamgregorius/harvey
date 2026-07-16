@@ -349,7 +349,7 @@ export default function Home() {
             const poly = { getLatLngs: () => [points] }
             const { lat, lon } = getPolygonCentroid(poly)
             const area_ha = calcPolygonAreaHectares(poly)
-            const newField = { name: fieldForm.name || `Lahan ${Date.now()}`, lat, lon, area_ha, plantingDate: fieldForm.plantingDate || null }
+            const newField = { name: fieldForm.name, lat, lon, area_ha, plantingDate: fieldForm.plantingDate || null }
 
             const weather = await getWeatherSummary(lat, lon)
             const soil = await getSoilSummary(lat, lon)
@@ -367,7 +367,6 @@ export default function Home() {
             setFinishedPolygons((prev) => [...prev, points])
             setDrawPoints([])
             setFieldForm({ name: '', plantingDate: '' })
-            setModalDone(false)
 
             // Save to backend
             storeField(finalField).catch(e => console.error('backend sync error:', e))
@@ -604,8 +603,11 @@ export default function Home() {
 
                 {/* First-point modal — field name + planting date */}
                 <Dialog open={showFieldModal} onClose={handleModalClose} maxWidth="xs" fullWidth>
-                    <DialogTitle sx={{ fontWeight: 700 }}>Info Lahan</DialogTitle>
+                    <DialogTitle sx={{ fontWeight: 700 }}>Simpan Lahan</DialogTitle>
                     <DialogContent>
+                        <DialogContentText sx={{ mb: 1 }}>
+                            Lengkapi info lahan sebelum menyimpan.
+                        </DialogContentText>
                         <Stack spacing={2} mt={1}>
                             <TextField
                                 label="Nama Lahan"
@@ -624,8 +626,13 @@ export default function Home() {
                                 fullWidth
                                 size="small"
                                 InputLabelProps={{ shrink: true }}
-                                placeholder=" "
-                                sx={{ '& input::placeholder': { opacity: 0 } }}
+                                sx={{
+                                    '& input::-webkit-datetime-edit': { color: 'transparent' },
+                                    '& input::-webkit-datetime-edit-year-field': { color: 'inherit' },
+                                    '& input::-webkit-datetime-edit-month-field': { color: 'inherit' },
+                                    '& input::-webkit-datetime-edit-day-field': { color: 'inherit' },
+                                    '& input:focus::-webkit-datetime-edit': { color: 'inherit' },
+                                }}
                             />
                         </Stack>
                     </DialogContent>

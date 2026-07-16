@@ -1,1 +1,245 @@
-[]
+[
+  {
+    "id": "1784215141234",
+    "createdAt": "2026-07-16T15:19:01.234Z",
+    "name": "Lahan 1784215137944",
+    "lat": -6.878193075156308,
+    "lon": 107.32732696464349,
+    "area_ha": 44.61370314652427,
+    "plantingDate": null,
+    "temp": 22.6,
+    "humidity": 79,
+    "rainfall_mm": 0,
+    "windSpeed": 1,
+    "weatherCode": 0,
+    "description": "Cerah",
+    "elevation": 547,
+    "forecast": [
+      {
+        "date": "2026-07-16",
+        "tempMax": 29.9,
+        "tempMin": 19.9,
+        "precipMm": 0,
+        "weatherCode": 2,
+        "description": "Parsial berawan"
+      },
+      {
+        "date": "2026-07-17",
+        "tempMax": 30,
+        "tempMin": 20.5,
+        "precipMm": 0,
+        "weatherCode": 1,
+        "description": "Cerah"
+      },
+      {
+        "date": "2026-07-18",
+        "tempMax": 29.9,
+        "tempMin": 19.4,
+        "precipMm": 0,
+        "weatherCode": 3,
+        "description": "Berawan"
+      },
+      {
+        "date": "2026-07-19",
+        "tempMax": 30.4,
+        "tempMin": 20.1,
+        "precipMm": 0,
+        "weatherCode": 3,
+        "description": "Berawan"
+      },
+      {
+        "date": "2026-07-20",
+        "tempMax": 30.2,
+        "tempMin": 19.8,
+        "precipMm": 0,
+        "weatherCode": 3,
+        "description": "Berawan"
+      }
+    ],
+    "soilType": "Andosol",
+    "clay_pct": 35,
+    "sand_pct": 25,
+    "silt_pct": 40,
+    "note": "Zona: Jawa vulkanik",
+    "rainfall30d": {
+      "total_mm": "26.6",
+      "avg_mm": "0.9"
+    },
+    "polygonPoints": [
+      {
+        "lat": -6.8816583976187315,
+        "lng": 107.32423818108234
+      },
+      {
+        "lat": -6.877951646243325,
+        "lng": 107.33453412628621
+      },
+      {
+        "lat": -6.87496918160687,
+        "lng": 107.32320858656193
+      }
+    ]
+  },
+  {
+    "id": "1784215930326",
+    "createdAt": "2026-07-16T15:32:10.326Z",
+    "name": "Lahan 1784215926160",
+    "lat": -6.228843822998666,
+    "lon": 106.95191014940677,
+    "area_ha": 815.0594906862334,
+    "plantingDate": null,
+    "temp": 27.4,
+    "humidity": 71,
+    "rainfall_mm": 0,
+    "windSpeed": 5.8,
+    "weatherCode": 0,
+    "description": "Cerah",
+    "elevation": 17,
+    "forecast": [
+      {
+        "date": "2026-07-16",
+        "tempMax": 34.6,
+        "tempMin": 24.8,
+        "precipMm": 0,
+        "weatherCode": 3,
+        "description": "Berawan"
+      },
+      {
+        "date": "2026-07-17",
+        "tempMax": 35.2,
+        "tempMin": 24.9,
+        "precipMm": 0.9,
+        "weatherCode": 51,
+        "description": "Gerimis ringan"
+      },
+      {
+        "date": "2026-07-18",
+        "tempMax": 34.1,
+        "tempMin": 25.8,
+        "precipMm": 5.5,
+        "weatherCode": 80,
+        "description": "Hujan lokal ringan"
+      },
+      {
+        "date": "2026-07-19",
+        "tempMax": 33.4,
+        "tempMin": 25.9,
+        "precipMm": 0.5,
+        "weatherCode": 51,
+        "description": "Gerimis ringan"
+      },
+      {
+        "date": "2026-07-20",
+        "tempMax": 33.7,
+        "tempMin": 25.6,
+        "precipMm": 0.8,
+        "weatherCode": 51,
+        "description": "Gerimis ringan"
+      }
+    ],
+    "soilType": "Andosol",
+    "clay_pct": 35,
+    "sand_pct": 25,
+    "silt_pct": 40,
+    "note": "Zona: Jawa vulkanik",
+    "rainfall30d": {
+      "total_mm": "59.9",
+      "avg_mm": "1.9"
+    },
+    "polygonPoints": [
+      {
+        "lat": -6.207182675027145,
+        "lng": 106.94695154818673
+      },
+      {
+        "lat": -6.240356974764136,
+        "lng": 106.9341371351778
+      },
+      {
+        "lat": -6.238991819204718,
+        "lng": 106.97464176485576
+      }
+    ]
+  },
+  {
+    "id": "1784216628235",
+    "createdAt": "2026-07-16T15:43:48.235Z",
+    "name": "Lahan 1784216621520",
+    "lat": -6.226716405056737,
+    "lon": 106.95359605455506,
+    "area_ha": 773.9435743831692,
+    "plantingDate": null,
+    "temp": 27.4,
+    "humidity": 71,
+    "rainfall_mm": 0,
+    "windSpeed": 5.8,
+    "weatherCode": 0,
+    "description": "Cerah",
+    "elevation": 18,
+    "forecast": [
+      {
+        "date": "2026-07-16",
+        "tempMax": 34.6,
+        "tempMin": 24.8,
+        "precipMm": 0,
+        "weatherCode": 3,
+        "description": "Berawan"
+      },
+      {
+        "date": "2026-07-17",
+        "tempMax": 35.2,
+        "tempMin": 24.9,
+        "precipMm": 0.9,
+        "weatherCode": 51,
+        "description": "Gerimis ringan"
+      },
+      {
+        "date": "2026-07-18",
+        "tempMax": 34.1,
+        "tempMin": 25.8,
+        "precipMm": 5.5,
+        "weatherCode": 80,
+        "description": "Hujan lokal ringan"
+      },
+      {
+        "date": "2026-07-19",
+        "tempMax": 33.4,
+        "tempMin": 25.9,
+        "precipMm": 0.5,
+        "weatherCode": 51,
+        "description": "Gerimis ringan"
+      },
+      {
+        "date": "2026-07-20",
+        "tempMax": 33.7,
+        "tempMin": 25.6,
+        "precipMm": 0.8,
+        "weatherCode": 51,
+        "description": "Gerimis ringan"
+      }
+    ],
+    "soilType": "Andosol",
+    "clay_pct": 35,
+    "sand_pct": 25,
+    "silt_pct": 40,
+    "note": "Zona: Jawa vulkanik",
+    "rainfall30d": {
+      "total_mm": "59.9",
+      "avg_mm": "1.9"
+    },
+    "polygonPoints": [
+      {
+        "lat": -6.216363850014322,
+        "lng": 106.93369056049417
+      },
+      {
+        "lat": -6.214998632070588,
+        "lng": 106.97161395866188
+      },
+      {
+        "lat": -6.2487867330853,
+        "lng": 106.9554836445091
+      }
+    ]
+  }
+]
