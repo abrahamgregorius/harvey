@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect } from 'react'
+import { Link } from 'react-router-dom'
 import { createTheme, ThemeProvider, CssBaseline } from '@mui/material'
 import {
     MapContainer, TileLayer, Polyline, CircleMarker, Polygon, useMap,
@@ -16,6 +17,12 @@ import Snackbar from '@mui/material/Snackbar'
 import Alert from '@mui/material/Alert'
 import Collapse from '@mui/material/Collapse'
 import IconButton from '@mui/material/IconButton'
+import Dialog from '@mui/material/Dialog'
+import DialogTitle from '@mui/material/DialogTitle'
+import DialogContent from '@mui/material/DialogContent'
+import DialogContentText from '@mui/material/DialogContentText'
+import DialogActions from '@mui/material/DialogActions'
+import TextField from '@mui/material/TextField'
 import LocationOnIcon from '@mui/icons-material/LocationOn'
 import TerrainIcon from '@mui/icons-material/Terrain'
 import WbSunnyIcon from '@mui/icons-material/WbSunny'
@@ -29,11 +36,13 @@ import ClearIcon from '@mui/icons-material/Clear'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import MyLocationIcon from '@mui/icons-material/MyLocation'
 import LayersIcon from '@mui/icons-material/Layers'
+import DashboardIcon from '@mui/icons-material/Dashboard'
 import { getBrowserLocation } from '../services/geoService.js'
 import { calcPolygonAreaHectares, getPolygonCentroid } from '../services/geoService.js'
 import { getWeatherSummary } from '../services/weatherService.js'
 import { getSoilSummary } from '../services/soilService.js'
 import { getLast30DaysRainfall } from '../services/rainfallService.js'
+import { storeField, getFields } from '../services/fieldStore.js'
 
 import L from 'leaflet'
 delete L.Icon.Default.prototype._getIconUrl
@@ -290,10 +299,33 @@ export default function Home() {
     const [center, setCenter] = useState([-6.2, 106.8])
     const [zoom, setZoom] = useState(8)
     const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'info' })
+    const [fieldForm, setFieldForm] = useState({ name: '', plantingDate: '' })
+    const [showFieldModal, setShowFieldModal] = useState(false)
 
     const showMsg = (message, severity = 'info') => {
         setSnackbar({ open: true, message, severity })
     }
+
+    const handleModalConfirm = () => {
+        if (!fieldForm.name.trim()) {
+            showMsg('Nama lahan wajib diisi', 'warning')
+            return
+        }
+        setShowFieldModal(false)
+        handleDrawn(drawPoints)
+    }
+
+    const handleModalClose = () => {
+        setShowFieldModal(false)
+    }
+
+    // Restore fields + polygons from backend on mount
+    useEffect(() => {
+        getFields().then(data => {
+            setFields(data)
+            setFinishedPolygons(data.filter(f => f.polygonPoints).map(f => f.polygonPoints))
+        }).catch(e => console.error('restore fields error:', e))
+    }, [])
 
     const handleLocate = async () => {
         setLocBtn(true)
@@ -317,7 +349,7 @@ export default function Home() {
             const poly = { getLatLngs: () => [points] }
             const { lat, lon } = getPolygonCentroid(poly)
             const area_ha = calcPolygonAreaHectares(poly)
-            const newField = { name: `Lahan ${Date.now()}`, lat, lon, area_ha }
+            const newField = { name: fieldForm.name || `Lahan ${Date.now()}`, lat, lon, area_ha, plantingDate: fieldForm.plantingDate || null }
 
             const weather = await getWeatherSummary(lat, lon)
             const soil = await getSoilSummary(lat, lon)
@@ -330,10 +362,15 @@ export default function Home() {
                   }
                 : null
 
-            const finalField = { ...newField, ...(weather ?? {}), ...(soil ?? {}), rainfall30d }
+            const finalField = { ...newField, ...(weather ?? {}), ...(soil ?? {}), rainfall30d, polygonPoints: points }
             setFields((prev) => [...(prev ?? []), finalField])
             setFinishedPolygons((prev) => [...prev, points])
             setDrawPoints([])
+            setFieldForm({ name: '', plantingDate: '' })
+            setModalDone(false)
+
+            // Save to backend
+            storeField(finalField).catch(e => console.error('backend sync error:', e))
         } catch (e) {
             console.error('handleDrawn error:', e)
             showMsg(`Gagal: ${e.message}`, 'error')
@@ -369,20 +406,34 @@ export default function Home() {
                             </Typography>
                         </Box>
                     </Stack>
-                    <Button
-                        variant="contained"
-                        size="small"
-                        startIcon={<MyLocationIcon />}
-                        onClick={handleLocate}
-                        disabled={locBtn}
-                        sx={{
-                            bgcolor: 'white', color: 'primary.main',
-                            fontWeight: 700, textTransform: 'none', borderRadius: 1.5,
-                            px: 2, '&:hover': { bgcolor: 'rgba(255,255,255,0.92)' },
-                        }}
-                    >
-                        {locBtn ? 'Mendapat lokasi…' : 'Lokasi Saya'}
-                    </Button>
+                    <Stack direction="row" spacing={1}>
+                        <Button
+                            component={Link}
+                            to="/dashboard"
+                            startIcon={<DashboardIcon />}
+                            sx={{
+                                bgcolor: 'rgba(255,255,255,0.15)', color: 'white',
+                                fontWeight: 700, textTransform: 'none', borderRadius: 1.5,
+                                px: 2, '&:hover': { bgcolor: 'rgba(255,255,255,0.25)' },
+                            }}
+                        >
+                            Dashboard
+                        </Button>
+                        <Button
+                            variant="contained"
+                            size="small"
+                            startIcon={<MyLocationIcon />}
+                            onClick={handleLocate}
+                            disabled={locBtn}
+                            sx={{
+                                bgcolor: 'white', color: 'primary.main',
+                                fontWeight: 700, textTransform: 'none', borderRadius: 1.5,
+                                px: 2, '&:hover': { bgcolor: 'rgba(255,255,255,0.92)' },
+                            }}
+                        >
+                            {locBtn ? 'Mendapat lokasi…' : 'Lokasi Saya'}
+                        </Button>
+                    </Stack>
                 </Box>
 
                 {/* Main content */}
@@ -483,7 +534,7 @@ export default function Home() {
                                     variant="contained"
                                     startIcon={<CheckIcon />}
                                     onClick={() => {
-                                        if (drawPoints.length >= 3) handleDrawn(drawPoints)
+                                        if (drawPoints.length >= 3) setShowFieldModal(true)
                                     }}
                                     disabled={drawPoints.length < 3}
                                     sx={{
@@ -550,6 +601,39 @@ export default function Home() {
                         {snackbar.message}
                     </Alert>
                 </Snackbar>
+
+                {/* First-point modal — field name + planting date */}
+                <Dialog open={showFieldModal} onClose={handleModalClose} maxWidth="xs" fullWidth>
+                    <DialogTitle sx={{ fontWeight: 700 }}>Info Lahan</DialogTitle>
+                    <DialogContent>
+                        <Stack spacing={2} mt={1}>
+                            <TextField
+                                label="Nama Lahan"
+                                value={fieldForm.name}
+                                onChange={(e) => setFieldForm((f) => ({ ...f, name: e.target.value }))}
+                                onKeyDown={(e) => e.key === 'Enter' && handleModalConfirm()}
+                                autoFocus
+                                fullWidth
+                                size="small"
+                            />
+                            <TextField
+                                label="Tanggal Tanam"
+                                type="date"
+                                value={fieldForm.plantingDate}
+                                onChange={(e) => setFieldForm((f) => ({ ...f, plantingDate: e.target.value }))}
+                                fullWidth
+                                size="small"
+                                InputLabelProps={{ shrink: true }}
+                                placeholder=" "
+                                sx={{ '& input::placeholder': { opacity: 0 } }}
+                            />
+                        </Stack>
+                    </DialogContent>
+                    <DialogActions sx={{ px: 3, pb: 2 }}>
+                        <Button onClick={handleModalClose} color="inherit">Batal</Button>
+                        <Button onClick={handleModalConfirm} variant="contained">OK</Button>
+                    </DialogActions>
+                </Dialog>
             </Box>
         </ThemeProvider>
     )
