@@ -10,33 +10,82 @@ app.use(express.json({ limit: '10mb' }))
 app.get('/api/fields', async (req, res) => {
   const { data, error } = await supabase
     .from('fields')
-    .select('*, crop_phases(*), risk_scores(*)')
+    .select('*')
     .order('created_at', { ascending: false })
   if (error) return res.status(500).json({ error: error.message })
-  res.json(data)
+  res.json(data.map(mapFieldFromDb))
 })
+
+// Map frontend names → DB column names
+function mapFieldToDb(f) {
+  return {
+    name: f.name,
+    area_hectares: f.area_ha ?? f.area_hectares,
+    latitude: f.lat ?? f.latitude,
+    longitude: f.lon ?? f.longitude,
+    plant_date: f.plantingDate ?? f.plant_date,
+    soil_type: f.soilType ?? f.soil_type,
+    crop_type: f.crop_type,
+    variety: f.variety,
+    polygon_points: f.polygonPoints,
+    temp: f.temp,
+    humidity: f.humidity,
+    wind_speed: f.windSpeed,
+    rainfall_mm: f.rainfall_mm,
+    elevation: f.elevation,
+    description: f.description,
+    rainfall30d: f.rainfall30d ? JSON.stringify(f.rainfall30d) : null,
+  }
+}
+
+// Map DB row → frontend names
+function mapFieldFromDb(f) {
+  if (!f) return null
+  return {
+    id: f.id,
+    name: f.name,
+    area_ha: f.area_hectares,
+    lat: f.latitude,
+    lon: f.longitude,
+    plantingDate: f.plant_date,
+    soilType: f.soil_type,
+    crop_type: f.crop_type,
+    variety: f.variety,
+    temp: f.temp,
+    humidity: f.humidity,
+    windSpeed: f.wind_speed,
+    rainfall_mm: f.rainfall_mm,
+    elevation: f.elevation,
+    description: f.description,
+    polygonPoints: f.polygon_points,
+    rainfall30d: f.rainfall30d ? (typeof f.rainfall30d === 'string' ? JSON.parse(f.rainfall30d) : f.rainfall30d) : null,
+    createdAt: f.created_at,
+  }
+}
 
 // POST new field
 app.post('/api/fields', async (req, res) => {
+  const mapped = mapFieldToDb(req.body)
   const { data, error } = await supabase
     .from('fields')
-    .insert([req.body])
+    .insert([mapped])
     .select()
     .single()
   if (error) return res.status(500).json({ error: error.message })
-  res.status(201).json(data)
+  res.status(201).json(mapFieldFromDb(data))
 })
 
 // PUT update field
 app.put('/api/fields/:id', async (req, res) => {
+  const mapped = mapFieldToDb(req.body)
   const { data, error } = await supabase
     .from('fields')
-    .update({ ...req.body, updated_at: new Date().toISOString() })
+    .update({ ...mapped, updated_at: new Date().toISOString() })
     .eq('id', req.params.id)
     .select()
     .single()
   if (error) return res.status(500).json({ error: error.message })
-  res.json(data)
+  res.json(mapFieldFromDb(data))
 })
 
 // DELETE field by id
