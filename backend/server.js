@@ -1,6 +1,7 @@
 import express from 'express'
 import cors from 'cors'
 import { supabase } from './supabase.js'
+import { calculateDailyRiskScore } from './risk-engine.js'
 
 const app = express()
 app.use(cors())
@@ -163,6 +164,16 @@ app.get('/api/recommendations', async (req, res) => {
     .order('created_at', { ascending: false })
   if (error) return res.status(500).json({ error: error.message })
   res.json(data)
+})
+
+// POST calculate risk
+app.post('/api/calculate-risk', (req, res) => {
+  try {
+    const result = calculateDailyRiskScore(req.body);
+    res.json(result);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
 })
 
 const PORT = process.env.PORT || 3001
