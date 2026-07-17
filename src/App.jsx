@@ -9,6 +9,7 @@ function App() {
       <Route path="/" element={<LandingPage />} />
       <Route path="/app" element={<Home />} />
       <Route path="/dashboard" element={<Dashboard />} />
+      <Route path="/dashboard/:page" element={<Dashboard />} />
     </Routes>
   )
 }

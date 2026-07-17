@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Stack, Box, Typography, Paper, IconButton, Button, Dialog, DialogTitle, DialogContent, DialogActions, TextField, FormControl, InputLabel, OutlinedInput } from '@mui/material'
+import { Stack, Box, Typography, Paper, IconButton, Button, Dialog, DialogTitle, DialogContent, DialogActions, TextField, FormControl, InputLabel, OutlinedInput, Collapse } from '@mui/material'
 import MapAltIcon from '@mui/icons-material/Map'
 import DeleteIcon from '@mui/icons-material/Delete'
 import EditIcon from '@mui/icons-material/Edit'
@@ -45,15 +45,20 @@ export function FieldsPage({ fields, onDelete, onUpdate }) {
     }
 
     return (
-        <Stack spacing={3} sx={{ p: 2 }}>
-            <Box>
-                <Typography variant="h5" fontWeight={800}>Daftar Lahan</Typography>
-                <Typography variant="body2" color="text.secondary" mt={0.5}>
-                    {fields.length} lahan terdaftar
-                </Typography>
+        <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: 0, overflow: 'hidden' }}>
+            <Box sx={{ px: 3, py: 2.5, borderBottom: '1px solid', borderColor: 'divider', bgcolor: 'background.paper', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Box>
+                    <Typography variant="h6" fontWeight={700}>Daftar Lahan</Typography>
+                    <Typography variant="caption" color="text.secondary">
+                        {fields.length} lahan · {new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+                    </Typography>
+                </Box>
+                <Button component={Link} to="/" variant="contained" size="small" startIcon={<MapAltIcon />}>
+                    Tambah Lahan
+                </Button>
             </Box>
 
-            <Paper sx={{ bgcolor: 'background.paper', border: '1px solid', borderColor: 'divider', borderRadius: 2, overflow: 'hidden' }}>
+            <Paper sx={{ bgcolor: 'background.paper', border: '1px solid', margin: 2, borderColor: 'divider', borderRadius: 2, overflow: 'hidden' }}>
                 {fields.length === 0 ? (
                     <Box sx={{ p: 6, textAlign: 'center' }}>
                         <MapAltIcon sx={{ fontSize: 48, color: 'text.disabled', mb: 1 }} />
@@ -117,7 +122,7 @@ export function FieldsPage({ fields, onDelete, onUpdate }) {
                                         </Stack>
 
                                         {/* Expanded detail panel */}
-                                        {isExpanded && (
+                                        <Collapse in={isExpanded} timeout="auto">
                                             <Box sx={{ display: 'flex', gap: 2, p: 2, borderBottom: '1px solid', borderColor: 'divider', bgcolor: 'rgba(0,0,0,0.01)' }}>
                                                 <Box sx={{ width: 220, height: 160, borderRadius: 1, overflow: 'hidden', flexShrink: 0, bgcolor: 'grey.100' }}>
                                                     <MapContainer
@@ -159,7 +164,7 @@ export function FieldsPage({ fields, onDelete, onUpdate }) {
                                                     )}
                                                 </Box>
                                             </Box>
-                                        )}
+                                        </Collapse>
                                     </Box>
                                 )
                             })}
@@ -197,7 +202,7 @@ export function FieldsPage({ fields, onDelete, onUpdate }) {
                     <Button onClick={handleEditSave} variant="contained" size="small">Simpan</Button>
                 </DialogActions>
             </Dialog>
-        </Stack>
+        </Box>
     )
 }
 

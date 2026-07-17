@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import {
     createTheme, ThemeProvider, CssBaseline,
     Box, Typography, Stack, Button,
@@ -48,7 +48,7 @@ const PAGE_TITLES = {
     analytics: 'Analisis',
 }
 
-function Sidebar({ page, setPage }) {
+function Sidebar({ page }) {
     return (
         <Box sx={{
             width: SIDEBAR_W,
@@ -85,7 +85,8 @@ function Sidebar({ page, setPage }) {
                     {NAV.map(n => (
                         <Button
                             key={n.key}
-                            onClick={() => setPage(n.key)}
+                            component={Link}
+                            to={`/dashboard/${n.key}`}
                             startIcon={
                                 <Box sx={{
                                     color: page === n.key ? 'primary.main' : 'text.secondary',
@@ -138,9 +139,9 @@ function Sidebar({ page, setPage }) {
 }
 
 export default function Dashboard() {
+    const { page = 'home' } = useParams()
     const [fields, setFields] = useState([])
     const [loading, setLoading] = useState(true)
-    const [page, setPage] = useState('home')
     const avgRisk = fields.length > 0 ? Math.round(fields.reduce((s, f) => s + calcRiskScore(f), 0) / fields.length) : null
 
     useEffect(() => {
@@ -162,7 +163,7 @@ export default function Dashboard() {
         <ThemeProvider theme={theme}>
             <CssBaseline />
             <Box sx={{ height: '100vh', display: 'flex', bgcolor: 'background.default' }}>
-                <Sidebar page={page} setPage={setPage} />
+                <Sidebar page={page} />
                 <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
                     <Box sx={{
                         px: 3, py: 2,

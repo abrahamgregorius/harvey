@@ -1,7 +1,8 @@
-import { Stack, Box, Typography, Button, IconButton, Chip, Slider } from '@mui/material'
+import { Stack, Box, Typography, Button, IconButton, Chip, Slider, LinearProgress, Tooltip, Collapse } from '@mui/material'
 import WaterIcon from '@mui/icons-material/WaterDrop'
 import ShareIcon from '@mui/icons-material/Share'
 import WbSunnyIcon from '@mui/icons-material/WbSunny'
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import { Link } from 'react-router-dom'
 import { getGrowthStage } from '../utils/growthUtils'
 import { useState } from 'react'
@@ -19,22 +20,23 @@ function shareToWhatsApp(ranked) {
 export { getGrowthStage }
 
 export function calcRiskScore(f, elNino = 0) {
+    const c = _calcComponents(f, elNino)
+    return Math.round((c.scarcity * 0.40 + c.soilRisk * 0.20 + c.growthScore * 0.25 + c.et * 0.15) * 100)
+}
+
+function _calcComponents(f, elNino = 0) {
     const rainfall = f.rainfall30d?.total_mm ?? 0
     const temp = f.temp ?? 25
     const scarcity = Math.min(1, Math.max(0, (1 - rainfall / 120) * (temp / 40))) * (1 + elNino * 0.08)
-
     const sand = f.sand_pct ?? 30
     const soilRisk = Math.min(1, sand / 100)
-
     const g = getGrowthStage(f.plantingDate)
     const stageScore = { 'Vegetatif': 1.0, 'Generatif': 1.0, 'Pra-Panen': 0.5, 'Panen': 0.1, 'Belum Tanam': 0.05 }
     const growthScore = stageScore[g?.stage] ?? 0.05
-
     const humidity = f.humidity ?? 70
     const wind = f.windSpeed ?? 5
     const et = Math.min(1, (temp / 40) * (1 - humidity / 100) * (wind / 20))
-
-    return Math.round((scarcity * 0.40 + soilRisk * 0.20 + growthScore * 0.25 + et * 0.15) * 100)
+    return { scarcity, soilRisk, growthScore, et, temp, rainfall: Number(rainfall), humidity, wind, sand }
 }
 
 export function calcWaterAllocation(fields, elNino = 0) {
@@ -68,6 +70,7 @@ export function WaterAllocationPage({ fields }) {
     const [riskFilter, setRiskFilter] = useState('all')
     const [stageFilter, setStageFilter] = useState('all')
     const [elNinoSeverity, setElNinoSeverity] = useState(0)
+    const [expandedId, setExpandedId] = useState(null)
     const ranked = calcWaterAllocation(fields, elNinoSeverity)
     const totalWater = ranked.reduce((s, f) => s + f.waterAlloc_L, 0)
 
@@ -129,7 +132,7 @@ export function WaterAllocationPage({ fields }) {
                         }}
                     />
                 ))}
-                <Box sx={{ width: 1, height: 16, bgcolor: 'divider', mx: 0.5 }} />
+                <Box sx={{ width: 1, height: 2, bgcolor: 'divider', mx: 0.5 }} />
                 <Typography variant="caption" color="text.secondary" sx={{ mr: 0.5 }}>Tahap:</Typography>
                 {[['all', 'Semua'], ['Vegetatif', 'Vegetatif'], ['Generatif', 'Generatif'], ['Pra-Panen', 'Pra-Panen'], ['Panen', 'Panen']].map(([val, lbl]) => (
                     <Chip
@@ -193,7 +196,7 @@ export function WaterAllocationPage({ fields }) {
                                         '& .MuiSlider-rail': { bgcolor: 'rgba(239,68,68,0.15)', height: 6, borderRadius: 3 },
                                         '& .MuiSlider-thumb': { bgcolor: elNinoSeverity > 5 ? '#ef4444' : '#f97316', width: 16, height: 16, '&:hover': { boxShadow: `0 0 0 6px rgba(239,68,68,0.16)` } },
                                         '& .MuiSlider-mark': { width: 6, height: 6, borderRadius: '50%', bgcolor: 'rgba(239,68,68,0.3)' },
-                                '& .MuiSlider-markLabel': { transform: 'translateX(-0.5rem)' },
+                                        '& .MuiSlider-markLabel': { transform: 'translateX(-0.5rem)' },
                                     }}
                                     valueLabelFormat={v => v === 0 ? 'Normal' : `Lv ${v}`}
                                 />
@@ -243,6 +246,8 @@ export function WaterAllocationPage({ fields }) {
                     {filtered.map((f, idx) => {
                         const g = getGrowthStage(f.plantingDate)
                         const color = riskColor(f.riskScore)
+                        const c = _calcComponents(f, elNinoSeverity)
+                        const isExpanded = expandedId === f.id
                         const factors = []
                         if ((f.rainfall30d?.total_mm ?? 0) < 50) factors.push('Hujan rendah')
                         if ((f.temp ?? 0) > 30) factors.push('Suhu tinggi')
@@ -250,55 +255,121 @@ export function WaterAllocationPage({ fields }) {
                         if (['Vegetatif', 'Generatif'].includes(g?.stage)) factors.push('Fase aktif')
                         if ((f.windSpeed ?? 0) > 10) factors.push('Angin kencang')
                         const factorStr = factors.length > 0 ? factors.slice(0, 2).join(', ') : '—'
+                        const comps = [
+                            { label: 'Kekeringan (scarity)', raw: c.rainfall, unit: 'mm/30d', score: c.scarcity, weight: 0.40, color: '#ef4444', reason: c.rainfall < 50 ? 'Hujan sangat kurang' : c.rainfall < 100 ? 'Hujan di bawah normal' : 'Curah hujan cukup' },
+                            { label: 'Porositas Tanah', raw: c.sand, unit: '%pasir', score: c.soilRisk, weight: 0.20, color: '#f97316', reason: c.sand > 40 ? 'Sandy — air cepat hilang' : 'Drainase cukup baik' },
+                            { label: 'Fase Tumbuh', raw: g?.stage ?? '—', unit: '', score: c.growthScore, weight: 0.25, color: '#22c55e', reason: ['Vegetatif', 'Generatif'].includes(g?.stage) ? 'Kebutuhan air puncak' : 'Kebutuhan air rendah' },
+                            { label: 'Evapotranspirasi', raw: `${c.temp}°C / ${c.humidity}%`, unit: '', score: c.et, weight: 0.15, color: '#3b82f6', reason: c.et > 0.5 ? 'ET tinggi — penguapan cepat' : 'ET normal' },
+                        ]
 
                         return (
-                            <Box key={f.id} sx={{
-                                px: 3, py: 2,
-                                borderBottom: '1px solid',
-                                borderColor: 'divider',
-                                bgcolor: idx % 2 === 0 ? 'transparent' : 'rgba(0,0,0,0.01)',
-                                '&:hover': { bgcolor: 'rgba(46,125,50,0.04)' },
-                            }}>
-                                <Stack direction="row" alignItems="center">
-                                    <Box sx={{ flex: 1, display: 'flex', alignItems: 'center' }}>
-                                        <Box sx={{
-                                            width: 28, height: 28, borderRadius: '50%',
-                                            bgcolor: idx === 0 ? '#fbbf24' : idx === 1 ? '#94a3b8' : idx === 2 ? '#cd7c2f' : 'grey.200',
-                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                            mr: 1.5,
-                                        }}>
-                                            <Typography variant="caption" fontWeight={800} sx={{ color: idx < 3 ? 'white' : 'text.secondary', fontSize: 11 }}>
-                                                {f.rank}
+                            <Box key={f.id}>
+                                <Box onClick={() => setExpandedId(isExpanded ? null : f.id)}
+                                    sx={{
+                                        px: 3, py: 2,
+                                        borderBottom: isExpanded ? 'none' : '1px solid',
+                                        borderColor: 'divider',
+                                        bgcolor: isExpanded ? 'rgba(46,125,50,0.04)' : idx % 2 === 0 ? 'transparent' : 'rgba(0,0,0,0.01)',
+                                        cursor: 'pointer',
+                                        '&:hover': { bgcolor: isExpanded ? 'rgba(46,125,50,0.06)' : 'rgba(46,125,50,0.04)' },
+                                    }}>
+                                    <Stack direction="row" alignItems="center">
+                                        <Box sx={{ flex: 1, display: 'flex', alignItems: 'center' }}>
+                                            <Box sx={{
+                                                width: 28, height: 28, borderRadius: '50%',
+                                                bgcolor: idx === 0 ? '#fbbf24' : idx === 1 ? '#94a3b8' : idx === 2 ? '#cd7c2f' : 'grey.200',
+                                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                mr: 1.5,
+                                            }}>
+                                                <Typography variant="caption" fontWeight={800} sx={{ color: idx < 3 ? 'white' : 'text.secondary', fontSize: 11 }}>
+                                                    {f.rank}
+                                                </Typography>
+                                            </Box>
+                                            <ExpandMoreIcon sx={{ fontSize: 16, color: 'text.secondary', transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }} />
+                                        </Box>
+                                        <Typography variant="body2" fontWeight={600} sx={{ flex: 2 }}>{f.name}</Typography>
+                                        <Box sx={{ flex: 1 }}>
+                                            <Stack direction="row" spacing={1} alignItems="center">
+                                                <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: color }} />
+                                                <Typography variant="body2" fontWeight={700} sx={{ color }}>{f.riskScore}</Typography>
+                                                <Typography variant="caption" color="text.secondary">/100</Typography>
+                                            </Stack>
+                                            <Typography variant="caption" sx={{ color, fontSize: 10 }}>{riskLabel(f.riskScore)}</Typography>
+                                        </Box>
+                                        <Box sx={{ flex: 1 }}>
+                                            <Typography variant="body2" fontWeight={700} sx={{ color: '#2563eb' }}>
+                                                {f.waterAlloc_L.toLocaleString('id-ID')} L
+                                            </Typography>
+                                            <Typography variant="caption" color="text.secondary">
+                                                {((f.waterAlloc_L / f.area_ha) || 0).toFixed(0)} L/ha
                                             </Typography>
                                         </Box>
-                                    </Box>
-                                    <Typography variant="body2" fontWeight={600} sx={{ flex: 2 }}>{f.name}</Typography>
-                                    <Box sx={{ flex: 1 }}>
-                                        <Stack direction="row" spacing={1} alignItems="center">
-                                            <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: color }} />
-                                            <Typography variant="body2" fontWeight={700} sx={{ color }}>{f.riskScore}</Typography>
-                                            <Typography variant="caption" color="text.secondary">/100</Typography>
-                                        </Stack>
-                                        <Typography variant="caption" sx={{ color, fontSize: 10 }}>{riskLabel(f.riskScore)}</Typography>
-                                    </Box>
-                                    <Box sx={{ flex: 1 }}>
-                                        <Typography variant="body2" fontWeight={700} sx={{ color: '#2563eb' }}>
-                                            {f.waterAlloc_L.toLocaleString('id-ID')} L
-                                        </Typography>
-                                        <Typography variant="caption" color="text.secondary">
-                                            {((f.waterAlloc_L / f.area_ha) || 0).toFixed(0)} L/ha
-                                        </Typography>
-                                    </Box>
-                                    <Typography variant="body2" sx={{ flex: 1 }}>{f.area_ha?.toFixed(2)} ha</Typography>
-                                    <Box sx={{ flex: 1 }}>
-                                        {g && (
-                                            <Box sx={{ px: 1, py: 0.25, borderRadius: 1, bgcolor: `${g.color}20`, display: 'inline-block' }}>
-                                                <Typography variant="caption" fontWeight={700} sx={{ color: g.color }}>{g.stage}</Typography>
+                                        <Typography variant="body2" sx={{ flex: 1 }}>{f.area_ha?.toFixed(2)} ha</Typography>
+                                        <Box sx={{ flex: 1 }}>
+                                            {g && (
+                                                <Box sx={{ px: 1, py: 0.25, borderRadius: 1, bgcolor: `${g.color}20`, display: 'inline-block' }}>
+                                                    <Typography variant="caption" fontWeight={700} sx={{ color: g.color }}>{g.stage}</Typography>
+                                                </Box>
+                                            )}
+                                        </Box>
+                                        <Typography variant="caption" color="text.secondary" sx={{ flex: 1 }}>{factorStr}</Typography>
+                                    </Stack>
+                                </Box>
+
+                                <Collapse in={isExpanded} timeout="auto">
+                                    <Box sx={{ px: 3, py: 2.5, borderBottom: '1px solid', borderColor: 'divider', bgcolor: 'rgba(0,0,0,0.01)' }}>
+                                        <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
+                                            {/* Kiri: Stats */}
+                                            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                                                <Typography variant="caption" fontWeight={800} sx={{ color: 'text.secondary', textTransform: 'uppercase', letterSpacing: 0.8 }}>
+                                                    Data Pendukung
+                                                </Typography>
+                                                {[
+                                                    { label: 'Hujan 30d', value: `${c.rainfall.toFixed(1)} mm`, color: '#3b82f6' },
+                                                    { label: 'Suhu', value: `${c.temp}°C`, color: '#ef4444' },
+                                                    { label: 'Kelembapan', value: `${c.humidity}%`, color: '#22c55e' },
+                                                    { label: 'Angin', value: `${c.wind} km/j`, color: '#8b5cf6' },
+                                                    { label: 'Pasir', value: `${c.sand}%`, color: '#f97316' },
+                                                    ...(elNinoSeverity > 0 ? [{ label: 'El Niño Impact', value: `+${Math.round(elNinoSeverity * 8)}%`, color: '#ef4444' }] : []),
+                                                ].map(item => (
+                                                    <Box key={item.label} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', px: 2, py: 1, border: '1px solid', borderColor: 'divider', borderRadius: 1 }}>
+                                                        <Typography variant="body2" color="text.secondary">{item.label}</Typography>
+                                                        <Typography variant="body2" fontWeight={800} sx={{ color: item.color }}>{item.value}</Typography>
+                                                    </Box>
+                                                ))}
                                             </Box>
-                                        )}
+
+                                            {/* Kanan: Justifikasi */}
+                                            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                                                <Typography variant="caption" fontWeight={800} sx={{ color: 'text.secondary', textTransform: 'uppercase', letterSpacing: 0.8 }}>
+                                                    Justifikasi Skor Risiko
+                                                </Typography>
+                                                {comps.map(comp => (
+                                                    <Box key={comp.label} sx={{ p: 1.5, border: '1px solid', borderColor: 'divider', borderRadius: 1, borderLeft: `3px solid ${comp.color}` }}>
+                                                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
+                                                            <Typography variant="caption" fontWeight={700} sx={{ color: comp.color }}>{comp.label}</Typography>
+                                                            <Typography variant="caption" fontWeight={800} sx={{ color: comp.color }}>
+                                                                {Math.round(comp.score * 100)} <Typography component="span" variant="caption" color="text.secondary">× {comp.weight}</Typography>
+                                                            </Typography>
+                                                        </Box>
+                                                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.75 }}>
+                                                            {comp.reason}
+                                                        </Typography>
+                                                        <LinearProgress
+                                                            variant="determinate"
+                                                            value={comp.score * 100}
+                                                            sx={{
+                                                                height: 5, borderRadius: 3,
+                                                                bgcolor: 'rgba(0,0,0,0.06)',
+                                                                '& .MuiLinearProgress-bar': { bgcolor: comp.color, borderRadius: 3 },
+                                                            }}
+                                                        />
+                                                    </Box>
+                                                ))}
+                                            </Box>
+                                        </Box>
                                     </Box>
-                                    <Typography variant="caption" color="text.secondary" sx={{ flex: 1 }}>{factorStr}</Typography>
-                                </Stack>
+                                </Collapse>
                             </Box>
                         )
                     })}
