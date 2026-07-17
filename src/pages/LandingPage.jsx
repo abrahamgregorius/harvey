@@ -1,23 +1,31 @@
-import { useEffect, useRef, useState } from "react";
+/** @format */
 
-import { Link } from "react-router-dom";
+import {
+	useEffect,
+	useRef,
+	useState,
+} from 'react';
 
-import HeroImg from "@/assets/images/hero.jpg";
-import Testimony1 from "@/assets/images/testimony-1.jpg";
-import Testimony2 from "@/assets/images/testimony-2.jpg";
-import Testimony3 from "@/assets/images/testimony-3.jpg";
-import AccountTreeOutlinedIcon from "@mui/icons-material/AccountTreeOutlined";
-import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
-import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-import ChatOutlinedIcon from "@mui/icons-material/ChatOutlined";
-import CloseOutlinedIcon from "@mui/icons-material/CloseOutlined";
-import DeviceThermostatOutlinedIcon from "@mui/icons-material/DeviceThermostatOutlined";
-import GrassOutlinedIcon from "@mui/icons-material/GrassOutlined";
-import HistoryOutlinedIcon from "@mui/icons-material/HistoryOutlined";
-import MenuOutlinedIcon from "@mui/icons-material/MenuOutlined";
-import RemoveOutlinedIcon from "@mui/icons-material/RemoveOutlined";
-import SimCardOutlinedIcon from "@mui/icons-material/SimCardOutlined";
-import WaterDropOutlinedIcon from "@mui/icons-material/WaterDropOutlined";
+import { Link } from 'react-router-dom';
+
+import HeroImg from '@/assets/images/hero.jpg';
+import Testimony1 from '@/assets/images/testimony-1.jpg';
+import Testimony2 from '@/assets/images/testimony-2.jpg';
+import Testimony3 from '@/assets/images/testimony-3.jpg';
+import LogoImg from '@/assets/logo/logo.jpg';
+import AccountTreeOutlinedIcon from '@mui/icons-material/AccountTreeOutlined';
+import AddOutlinedIcon from '@mui/icons-material/AddOutlined';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import ChatOutlinedIcon from '@mui/icons-material/ChatOutlined';
+import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
+import DeviceThermostatOutlinedIcon
+	from '@mui/icons-material/DeviceThermostatOutlined';
+import GrassOutlinedIcon from '@mui/icons-material/GrassOutlined';
+import HistoryOutlinedIcon from '@mui/icons-material/HistoryOutlined';
+import MenuOutlinedIcon from '@mui/icons-material/MenuOutlined';
+import RemoveOutlinedIcon from '@mui/icons-material/RemoveOutlined';
+import SimCardOutlinedIcon from '@mui/icons-material/SimCardOutlined';
+import WaterDropOutlinedIcon from '@mui/icons-material/WaterDropOutlined';
 
 function AnimatedSection({ children, delay = 0, className = "" }) {
 	const ref = useRef();
@@ -77,7 +85,7 @@ const features = [
 	{
 		icon: ChatOutlinedIcon,
 		title: "Siap WhatsApp",
-		desc: "Output dikirim langsung ke grup WhatsApp petani — tanpa install app.",
+		desc: "Output dikirim langsung ke grup WhatsApp petani tanpa install app.",
 	},
 ];
 
@@ -87,7 +95,7 @@ const testimonials = [
 			"Sebelum Harvey, kami menghabiskan waktu 4 jam bermusyawarah untuk memutuskan alokasi air. Sekarang cukup 10 menit.",
 		name: "Budi Santoso",
 		role: "Ketua P3A Desa Sukamaju, Cianjur",
-		img: Testimony1,
+		img: Testimony2,
 		avatar: "BS",
 	},
 	{
@@ -95,7 +103,7 @@ const testimonials = [
 			"Harvey membantu kami menjelaskan ke petani mengapa lahan tertentu mendapat prioritas. Tidak ada yang merasa dipermainkan.",
 		name: "Dra. Rina Marlina",
 		role: "Penyuluh Pertanian Lapangan, Bandung",
-		img: Testimony2,
+		img: Testimony1,
 		avatar: "RM",
 	},
 	{
@@ -111,7 +119,7 @@ const testimonials = [
 const faqs = [
 	{
 		q: "Apa yang membedakan Harvey dari aplikasi pertanian lainnya?",
-		a: "Semua aplikasi pertanian digital yang ada fokus pada satu petani, satu lahan. Harvey membantu P3A mengevaluasi risiko seluruh lahan dalam satu kelompok — dan menghasilkan priority ranking yang bisa dipakai dalam musyawarah.",
+		a: "Semua aplikasi pertanian digital yang ada fokus pada satu petani, satu lahan. Harvey membantu P3A mengevaluasi risiko seluruh lahan dalam satu kelompok dan menghasilkan priority ranking yang bisa dipakai dalam musyawarah.",
 	},
 	{
 		q: "Apakah Harvey membutuhkan sensor di lapangan?",
@@ -145,7 +153,7 @@ const steps = [
 	{
 		n: "03",
 		title: "Skor Risiko Dihitung",
-		desc: "Harvey menghitung risk score tiap lahan berdasarkan data yang ada — hasilnya bisa dilihat di dashboard.",
+		desc: "Harvey menghitung risk score tiap lahan berdasarkan data yang ada hasilnya bisa dilihat di dashboard.",
 	},
 	{
 		n: "04",
@@ -169,15 +177,13 @@ function Navbar() {
 	}, []);
 	return (
 		<nav
-			className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? "bg-[rgba(250,248,245,0.92)] backdrop-blur-[12px] border-b border-[#E5E0D8]" : "bg-transparent"}`}
+			className={`fixed top-0 left-0 right-0 z-50 bg-white  transition-all duration-300 ${scrolled ? "backdrop-blur-[12px]" : "bg-transparent"}`}
 		>
 			<div className="max-w-7xl mx-auto px-6">
 				<div className="flex items-center justify-between py-4">
 					<div className="flex items-center gap-2">
-						<div className="w-8 h-8 rounded-lg bg-[#1B4332] flex items-center justify-center">
-							<WaterDropOutlinedIcon sx={{ fontSize: 16, color: "white" }} />
-						</div>
-						<span className="font-bold text-[17px] tracking-tight text-[#111827]">
+						<img src={LogoImg} className="h-15" alt="" />
+						<span className="font-bold text-2xl tracking-tight text-[#111827]">
 							Harvey
 						</span>
 					</div>
@@ -293,7 +299,7 @@ export default function LandingPage() {
 							</h2>
 							<p className="text-[16px] md:text-[17px] text-[#6B7280] leading-relaxed max-w-[480px] mb-8">
 								Harvey membantu P3A membuat keputusan alokasi irigasi yang adil
-								dan transparan — berbasis data cuaca, fase tanam, dan kondisi
+								dan transparan berbasis data cuaca, fase tanam, dan kondisi
 								tanah.
 							</p>
 							<div className="flex flex-col sm:flex-row gap-3">
@@ -356,7 +362,7 @@ export default function LandingPage() {
 					<AnimatedSection delay={100}>
 						<p className="text-[16px] md:text-[17px] text-[#6B7280] leading-relaxed mb-6">
 							Dalam kondisi kekeringan, P3A harus memutuskan lahan mana yang
-							mendapat air irigasi terlebih dahulu. Keputusan ini sangat sulit —
+							mendapat air irigasi terlebih dahulu. Keputusan ini sangat sulit
 							dan sering kali consequential.
 						</p>
 					</AnimatedSection>
@@ -718,41 +724,52 @@ export default function LandingPage() {
 			</section>
 
 			{/* TESTIMONIALS */}
-			<section className="py-[80px] md:py-[120px] bg-white">
+			<section className="py-[90px] md:py-[140px] bg-gradient-to-b from-white to-[#F8FAF8]">
 				<div className="max-w-7xl mx-auto px-6">
 					<AnimatedSection>
-						<div className="text-center mb-12 md:mb-16">
-							<p className="text-[12px] font-bold text-[#1B4332] uppercase tracking-widest mb-2">
+						<div className="text-center mb-14">
+							<p className="text-[12px] font-bold uppercase tracking-[0.3em] text-[#2D6A4F] mb-3">
 								Testimoni
 							</p>
-							<h3 className="font-extrabold text-[1.8rem] md:text-[2.6rem] leading-[1.15] tracking-[-1px] text-[#111827]">
-								Dari Lapangan.
+
+							<h3 className="text-[2rem] md:text-[3rem] font-extrabold tracking-[-2px] text-[#111827]">
+								Dari Mereka yang
+								<br />
+								Merasakannya Langsung.
 							</h3>
+
+							<p className="max-w-xl mx-auto mt-5 text-[#6B7280] leading-relaxed">
+								Cerita nyata dari petani yang mulai mengambil keputusan lebih
+								percaya diri dengan bantuan Harvey.
+							</p>
 						</div>
 					</AnimatedSection>
-					<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+					<div className="grid grid-cols-1 md:grid-cols-3 gap-7">
 						{testimonials.map((t, i) => (
 							<AnimatedSection key={i} delay={i * 80}>
-								<div className="bg-[#FAF8F5] rounded-2xl p-5 h-full border border-[#E5E0D8] flex flex-col">
-									<p className="text-[48px] text-[#D8EAE3] font-serif leading-none mb-2">
-										"
-									</p>
-									<img
-										src={t.img}
-										className="h-60 object-fit object-cover object-center"
-										alt="img-test"
-									/>
-									<p className="text-[14px] text-[#111827] leading-relaxed mb-4 flex-1">
-										{t.quote}
-									</p>
-									<div className="flex items-center gap-3 mt-auto">
-										<div>
-											<p className="text-[13px] font-bold text-[#111827]">
-												{t.name}
-											</p>
-											<p className="text-[11.5px] text-[#6B7280] leading-tight">
-												{t.role}
-											</p>
+								<div className="group bg-white rounded-3xl overflow-hidden border border-[#E8ECEA] shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 h-full flex flex-col">
+									<div className="overflow-hidden">
+										<img
+											src={t.img}
+											alt={t.name}
+											className="h-64 w-full object-cover transition duration-700 group-hover:scale-105"
+										/>
+									</div>
+
+									<div className="p-7 flex flex-col flex-1">
+										<div className="text-[#2D6A4F]/20 text-[72px] font-serif leading-none -mb-6">
+											“
+										</div>
+
+										<p className="text-[15px] leading-8 text-[#374151] flex-1 relative z-10">
+											{t.quote}
+										</p>
+
+										<div className="mt-8 pt-5 border-t border-[#EEF2F1]">
+											<p className="font-bold text-[#111827]">{t.name}</p>
+
+											<p className="text-sm text-[#6B7280] mt-1">{t.role}</p>
 										</div>
 									</div>
 								</div>
@@ -761,7 +778,6 @@ export default function LandingPage() {
 					</div>
 				</div>
 			</section>
-
 			{/* FAQ */}
 			<section className="py-[80px] md:py-[120px] bg-[#FAF8F5]">
 				<div className="max-w-3xl mx-auto px-6">

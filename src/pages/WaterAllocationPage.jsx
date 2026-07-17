@@ -1,3 +1,5 @@
+/** @format */
+
 import {
 	useEffect,
 	useState,
@@ -31,7 +33,7 @@ import { getGrowthStage } from '../utils/growthUtils';
 
 function shareToWhatsApp(ranked) {
 	const lines = [
-		"🌊 Jadwal Irigasi Priority — HARVEY",
+		"Jadwal Irigasi Priority",
 		`Total: ${ranked.reduce((s, f) => s + f.waterAlloc_L, 0).toLocaleString("id-ID")} L untuk ${ranked.length} lahan`,
 		"",
 	];
