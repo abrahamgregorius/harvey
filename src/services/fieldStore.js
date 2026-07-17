@@ -1,7 +1,8 @@
-const API = 'http://localhost:3001/api/fields'
-const RISK_API = 'http://localhost:3001/api/calculate-risk'
-const RISK_BATCH_API = 'http://localhost:3001/api/risks/batch'
-const RISK_HISTORY_API = 'http://localhost:3001/api/risks/history'
+const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001'
+const API = `${BASE_URL}/api/fields`
+const RISK_API = `${BASE_URL}/api/calculate-risk`
+const RISK_BATCH_API = `${BASE_URL}/api/risks/batch`
+const RISK_HISTORY_API = `${BASE_URL}/api/risks/history`
 
 export async function storeField(field) {
     const res = await fetch(API, {
