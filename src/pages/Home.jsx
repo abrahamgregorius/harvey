@@ -407,15 +407,6 @@ export default function Home() {
                         >
                             Dashboard
                         </Button>
-                        <Button
-                            startIcon={<MyLocationIcon />}
-                            onClick={handleLocate}
-                            disabled={locBtn}
-                            variant="contained"
-                            size="small"
-                        >
-                            {locBtn ? 'Mendapat lokasi…' : 'Lokasi Saya'}
-                        </Button>
                     </Stack>
                 </Box>
 
@@ -458,6 +449,26 @@ export default function Home() {
                             </MapContainer>
 
                             {/* Controls — outside MapContainer so Leaflet panes don't cover them */}
+                            <Box className="absolute bottom-3 right-3 z-[600]">
+                                <Button
+                                    startIcon={<MyLocationIcon />}
+                                    onClick={async () => {
+                                        try {
+                                            const loc = await getBrowserLocation()
+                                            setCenter([loc.lat, loc.lon])
+                                            setZoom(16)
+                                        } catch (e) {
+                                            console.error(e)
+                                        }
+                                    }}
+                                    size="small"
+                                    variant="contained"
+                                    sx={{ bgcolor: 'white', color: 'primary.main', '&:hover': { bgcolor: '#f5f5f5' } }}
+                                >
+                                    Lokasi Saya
+                                </Button>
+                            </Box>
+
                             <Box className="absolute top-3 right-3 z-[600] flex gap-2">
                                 <Button
                                     startIcon={<UndoIcon />}

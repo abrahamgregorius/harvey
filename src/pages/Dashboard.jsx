@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { useState, useEffect, useRef } from 'react'
+import { Link, useParams } from 'react-router-dom'
 import {
     createTheme, ThemeProvider, CssBaseline,
     Box, Typography, Stack, Button,
-    CircularProgress,
+    CircularProgress, Popover,
 } from '@mui/material'
 import LayersIcon from '@mui/icons-material/Layers'
 import DashboardIcon from '@mui/icons-material/Dashboard'
@@ -14,7 +14,7 @@ import LeaderboardIcon from '@mui/icons-material/Leaderboard'
 import { getFields, deleteField } from '../services/fieldStore.js'
 import { HomePage } from './HomePage.jsx'
 import { FieldsPage } from './FieldsPage.jsx'
-import { WaterAllocationPage } from './WaterAllocationPage.jsx'
+import { WaterAllocationPage, calcRiskScore } from './WaterAllocationPage.jsx'
 import { AnalyticsPage } from './AnalyticsPage.jsx'
 
 const theme = createTheme({
@@ -48,7 +48,7 @@ const PAGE_TITLES = {
     analytics: 'Analisis',
 }
 
-function Sidebar({ page, setPage }) {
+function Sidebar({ page }) {
     return (
         <Box sx={{
             width: SIDEBAR_W,
@@ -85,7 +85,8 @@ function Sidebar({ page, setPage }) {
                     {NAV.map(n => (
                         <Button
                             key={n.key}
-                            onClick={() => setPage(n.key)}
+                            component={Link}
+                            to={`/dashboard/${n.key}`}
                             startIcon={
                                 <Box sx={{
                                     color: page === n.key ? 'primary.main' : 'text.secondary',
@@ -116,7 +117,7 @@ function Sidebar({ page, setPage }) {
             <Box sx={{ px: 1.5, py: 2, borderTop: '1px solid', borderColor: 'divider' }}>
                 <Button
                     component={Link}
-                    to="/"
+                    to="/app"
                     startIcon={<MapAltIcon sx={{ fontSize: 20 }} />}
                     sx={{
                         justifyContent: 'flex-start',
@@ -138,9 +139,12 @@ function Sidebar({ page, setPage }) {
 }
 
 export default function Dashboard() {
+    const { page = 'home' } = useParams()
     const [fields, setFields] = useState([])
     const [loading, setLoading] = useState(true)
-    const [page, setPage] = useState('home')
+    const [showInfo, setShowInfo] = useState(false)
+    const harveyBoxRef = useRef(null)
+    const avgRisk = fields.length > 0 ? Math.round(fields.reduce((s, f) => s + calcRiskScore(f), 0) / fields.length) : null
 
     useEffect(() => {
         getFields().then(data => { setFields(data) }).catch(console.error).finally(() => setLoading(false))
@@ -161,7 +165,7 @@ export default function Dashboard() {
         <ThemeProvider theme={theme}>
             <CssBaseline />
             <Box sx={{ height: '100vh', display: 'flex', bgcolor: 'background.default' }}>
-                <Sidebar page={page} setPage={setPage} />
+                <Sidebar page={page} />
                 <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
                     <Box sx={{
                         px: 3, py: 2,
@@ -177,6 +181,66 @@ export default function Dashboard() {
                         <Typography variant="caption" sx={{ color: 'text.secondary' }}>
                             {fields.length} lahan · {new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
                         </Typography>
+                        {avgRisk !== null && (
+                            <>
+                                <Box
+                                    onMouseEnter={() => setShowInfo(true)}
+                                    onMouseLeave={() => setShowInfo(false)}
+                                    ref={harveyBoxRef}
+                                    sx={{
+                                        border: '1px solid',
+                                        borderColor: 'divider',
+                                        borderRadius: 1.5,
+                                        px: 1.5, py: 1,
+                                        cursor: 'default',
+                                        ml: 3,
+                                    }}
+                                >
+                                    <Stack direction="row" spacing={1} alignItems="center">
+                                        <Box sx={{ position: 'relative', display: 'inline-flex' }}>
+                                            <CircularProgress
+                                                variant="determinate"
+                                                value={100}
+                                                size={36}
+                                                thickness={5}
+                                                sx={{ color: 'rgba(0,0,0,0.1)', position: 'absolute' }}
+                                            />
+                                            <CircularProgress
+                                                variant="determinate"
+                                                value={avgRisk}
+                                                size={36}
+                                                thickness={5}
+                                                sx={{ color: avgRisk >= 70 ? '#ef4444' : avgRisk >= 50 ? '#f97316' : avgRisk >= 30 ? '#eab308' : '#22c55e', '& .MuiCircularProgress-circle': { strokeLinecap: 'round' } }}
+                                            />
+                                            <Box sx={{ top: 0, left: 0, bottom: 0, right: 0, position: 'absolute', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                <Typography variant="caption" fontWeight={800} sx={{ fontSize: 10 }}>{avgRisk}</Typography>
+                                            </Box>
+                                        </Box>
+                                        <Box>
+                                            <Typography variant="body2" fontWeight={700} sx={{ display: 'block', lineHeight: 1.1 }}>Harvey Score</Typography>
+                                            <Typography variant="body2" color="text.secondary" sx={{ fontSize: 12 }}>Rata-rata</Typography>
+                                        </Box>
+                                    </Stack>
+                                </Box>
+                                <Popover
+                                    open={showInfo}
+                                    anchorEl={harveyBoxRef.current}
+                                    anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+                                    transformOrigin={{ vertical: 'top', horizontal: 'center' }}
+                                    sx={{ mt: -1, pointerEvents: 'none' }}
+                                >
+                                    <Box sx={{ px: 1.5, py: 1.5 }}>
+                                        <Typography variant="body2" fontWeight={700} sx={{ display: 'block', mb: 0.5 }}>Tentang Harvey Score</Typography>
+                                        <Typography variant="body2" sx={{ display: 'block', mb: 0.5 }}>
+                                            Dihitung dari kelangkaan air (curah hujan & suhu), jenis tanah, tahap pertumbuhan tanaman, dan evapotranspirasi.
+                                        </Typography>
+                                        <Typography variant="body2" color="text.secondary" sx={{ display: 'block', fontSize: 12 }}>
+                                            Skor tinggi = kebutuhan air tinggi. Digunakan untuk alokasi air panen.
+                                        </Typography>
+                                    </Box>
+                                </Popover>
+                            </>
+                        )}
                     </Box>
 
                     <Box sx={{ flex: 1, overflow: 'auto', minHeight: 0 }}>
