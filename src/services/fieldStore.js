@@ -57,12 +57,12 @@ export async function calculateRisk(field) {
 }
 
 // ponytail: batch risk — elNino pre-processing matches backend logic
-export async function calculateRiskBatch(fields, elNino = 0) {
+export async function calculateRiskBatch(fields, elNino = 0, simulateDays = 1) {
     const payload = fields.map((f) => ({ ...f, elNino }));
     const res = await fetch(RISK_BATCH_API, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ fields: payload }),
+        body: JSON.stringify({ fields: payload, simulateDays }),
     });
     if (!res.ok) throw new Error(`calculateRiskBatch failed: ${res.status}`);
     return res.json();

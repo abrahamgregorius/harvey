@@ -52,7 +52,7 @@ export { getGrowthStage };
 export function calcRiskScore(f, elNino = 0) {
 	const c = _calcComponents(f, elNino);
 	return Math.round(
-		(c.scarcity * 0.4 + c.soilRisk * 0.2 + c.growthScore * 0.25 + c.et * 0.15) *
+		(c.scarcity * 0.7 + c.soilRisk * 0.05 + c.growthScore * 0.15 + c.et * 0.1) *
 			100,
 	);
 }
@@ -61,8 +61,8 @@ function _calcComponents(f, elNino = 0) {
 	const rainfall = f.rainfall30d?.total_mm ?? 0;
 	const temp = f.temp ?? 25;
 	const scarcity =
-		Math.min(1, Math.max(0, (1 - rainfall / 120) * (temp / 40))) *
-		(1 + elNino * 0.08);
+		Math.max(0, (1 - rainfall / 120) * (temp / 40)) *
+		(1 + elNino * 0.016);
 	const sand = f.sand_pct ?? 30;
 	const soilRisk = Math.min(1, sand / 100);
 	const g = getGrowthStage(f.plantingDate);
@@ -96,7 +96,7 @@ export function calcWaterAllocation(fields, elNino = 0, riskScoreMap = {}) {
 	const ranked = fields.map((f) => {
 		const faoScore = riskScoreMap[f.id];
 		const riskScore =
-			faoScore != null ? Math.round(faoScore * 100) : calcRiskScore(f, elNino);
+			faoScore != null ? faoScore : calcRiskScore(f, elNino);
 		return { ...f, riskScore };
 	});
 	ranked.sort((a, b) => b.riskScore - a.riskScore);
@@ -136,23 +136,34 @@ export function WaterAllocationPage({ fields }) {
 	const [riskScoreMap, setRiskScoreMap] = useState({});
 	const [historyMap, setHistoryMap] = useState({});
 	const [loading, setLoading] = useState(false);
+	const [droughtSim, setDroughtSim] = useState(false);
 
 	useEffect(() => {
 		if (!fields.length) return;
-		setLoading(true);
-		calculateRiskBatch(fields, elNinoSeverity)
-			.then((results) => {
-				const map = {};
-				results.forEach((r) => {
-					if (r.error) return;
-					const f = fields[r.index];
-					if (f) map[f.id] = r.riskScore;
-				});
-				setRiskScoreMap(map);
-			})
-			.catch(console.error)
-			.finally(() => setLoading(false));
-	}, [fields, elNinoSeverity]);
+		if (droughtSim) {
+			const map = {};
+			fields.forEach((f) => {
+				const simF = {
+					...f,
+					rainfall30d: { total_mm: 0, avg_mm: 0 },
+					temp: (f.temp ?? 30) + 8,
+				};
+				const base = calcRiskScore(simF, 10);
+				const sand = f.sand_pct ?? 30;
+				const soilVar = Math.round((sand / 100 - 0.3) * 15);
+				map[f.id] = Math.min(100, Math.max(40, base + soilVar));
+			});
+			setRiskScoreMap(map);
+		} else if (elNinoSeverity > 0) {
+			const map = {};
+			fields.forEach((f) => {
+				map[f.id] = calcRiskScore(f, elNinoSeverity);
+			});
+			setRiskScoreMap(map);
+		} else {
+			setRiskScoreMap({});
+		}
+	}, [fields, elNinoSeverity, droughtSim]);
 
 	const ranked = calcWaterAllocation(fields, elNinoSeverity, riskScoreMap);
 	const totalWater = ranked.reduce((s, f) => s + f.waterAlloc_L, 0);
@@ -254,14 +265,15 @@ export function WaterAllocationPage({ fields }) {
 				>
 					<Box>
 						<Typography variant="h5" fontWeight={800}>
-							Alokasi Air berdasarkan Skor Risiko
+							Alokasi Air
 						</Typography>
 						<Typography
 							variant="body2"
 							sx={{ color: "text.secondary", mt: 0.5 }}
 						>
-							Menampilkan {filtered.length} dari {fields.length} lahan · Total{" "}
-							{totalWater.toLocaleString("id-ID")} L tersedia
+							{droughtSim
+								? `☀ Kemarau 30+ hari · Hujan = 0 mm · El Niño Parah · Menampilkan ${filtered.length} lahan`
+								: `Menampilkan ${filtered.length} dari ${fields.length} lahan · Total ${totalWater.toLocaleString("id-ID")} L tersedia`}
 						</Typography>
 					</Box>
 					<IconButton
@@ -564,6 +576,29 @@ export function WaterAllocationPage({ fields }) {
 								</Typography>
 							</Box>
 						)}
+						<Button
+							size="small"
+							onClick={() => setDroughtSim((v) => !v)}
+							sx={{
+								ml: 1,
+								px: 1.5,
+								py: 0.5,
+								bgcolor: droughtSim ? "#ef4444" : "rgba(239,68,68,0.1)",
+								color: droughtSim ? "white" : "#ef4444",
+								border: "1px solid",
+								borderColor: "#ef4444",
+								borderRadius: 1,
+								flexShrink: 0,
+								fontSize: 11,
+								fontWeight: 700,
+								textTransform: "none",
+								"&:hover": {
+									bgcolor: droughtSim ? "#dc2626" : "rgba(239,68,68,0.2)",
+								},
+							}}
+						>
+							{droughtSim ? "Matikan Simulasi" : "☀ Simulasi Kemarau"}
+						</Button>
 					</Box>
 				</Box>
 
