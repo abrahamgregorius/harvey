@@ -176,5 +176,97 @@ app.post('/api/calculate-risk', (req, res) => {
   }
 })
 
+// POST batch risk for multiple fields (single point in time)
+app.post('/api/risks/batch', (req, res) => {
+  const { fields } = req.body;
+  if (!Array.isArray(fields)) {
+    return res.status(400).json({ error: 'fields must be an array' });
+  }
+  const results = fields.map((f, i) => {
+    try {
+      const today = new Date().toISOString().split('T')[0];
+      const elNino = f.elNino ?? 0;
+      const avgDailyRainfall = f.forecast?.[0]?.precipMm ?? f.rainfall30d?.avg_mm ?? f.rainfall_mm ?? 0;
+      const adjRainfall = Math.max(0, avgDailyRainfall * (1 - elNino * 0.08));
+      const adjTempMax = (f.temp ?? 30) * (1 + elNino * 0.02);
+      const result = calculateDailyRiskScore({
+        soilType: f.soilType,
+        cropType: f.crop_type ?? "Padi",
+        plantDate: f.plantingDate,
+        logDate: today,
+        latitude: f.lat,
+        tempMax: adjTempMax,
+        tempMin: adjTempMax - 5,
+        rainfallMm: adjRainfall,
+        irrigationMm: f.irrigation_mm ?? 0,
+      });
+      return { index: i, ...result };
+    } catch (e) {
+      return { index: i, error: e.message };
+    }
+  });
+  res.json(results);
+});
+
+// GET 30-day risk history for a field
+app.get('/api/risks/history/:fieldId', async (req, res) => {
+  const { fieldId } = req.params;
+  const days = parseInt(req.query.days) || 30;
+  const limit = Math.min(days, 365);
+
+  const { data: field, error: fieldError } = await supabase
+    .from('fields')
+    .select('*')
+    .eq('id', fieldId)
+    .single();
+  if (fieldError) return res.status(404).json({ error: 'field not found' });
+
+  const { data: weatherRows } = await supabase
+    .from('weather_data')
+    .select('*')
+    .eq('field_id', fieldId)
+    .order('recorded_at', { ascending: false })
+    .limit(limit);
+
+  const weatherMap = {};
+  if (weatherRows) {
+    weatherRows.forEach((w) => {
+      const d = new Date(w.recorded_at).toISOString().split('T')[0];
+      if (!weatherMap[d]) {
+        weatherMap[d] = { rainfall_mm: w.rainfall_mm ?? 0, temp_max: w.temp_max ?? w.temp ?? 30, temp_min: w.temp_min ?? (w.temp ?? 30) - 5 };
+      }
+    });
+  }
+
+  const history = [];
+  for (let i = limit - 1; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    const dateStr = d.toISOString().split('T')[0];
+    const w = weatherMap[dateStr] || {};
+    const elNino = parseFloat(req.query.elNino) || 0;
+    const fieldAvgRain = field.rainfall30d?.avg_mm ?? field.rainfall_mm ?? 0;
+    const adjRainfall = Math.max(0, (w.rainfall_mm ?? fieldAvgRain) * (1 - elNino * 0.08));
+    const adjTempMax = ((w.temp_max ?? field.temp ?? 30)) * (1 + elNino * 0.02);
+    try {
+      const result = calculateDailyRiskScore({
+        soilType: field.soil_type,
+        cropType: field.crop_type,
+        plantDate: field.plant_date,
+        logDate: dateStr,
+        latitude: field.latitude,
+        tempMax: adjTempMax,
+        tempMin: adjTempMax - 5,
+        rainfallMm: adjRainfall,
+        irrigationMm: 0,
+      });
+      history.push({ date: dateStr, ...result });
+    } catch (e) {
+      history.push({ date: dateStr, error: e.message });
+    }
+  }
+  res.json(history);
+});
+
 const PORT = process.env.PORT || 3001
 app.listen(PORT, () => console.log(`HARVEY backend running on :${PORT}`))
