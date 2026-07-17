@@ -203,9 +203,7 @@ function Sidebar({ page, anchorEl, setAnchorEl }) {
 						Buka Peta
 					</Button>
 					<Button
-						component={Link}
-						to="/"
-						onClick={() => setAnchorEl(null)}
+						onClick={() => { setAnchorEl(null); localStorage.removeItem('supabase-auth-token'); window.location.href = '/login'; }}
 						startIcon={<LogoutIcon sx={{ fontSize: 18 }} />}
 						sx={{
 							justifyContent: "flex-start",
