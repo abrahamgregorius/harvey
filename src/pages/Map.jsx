@@ -62,6 +62,7 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 
 import {
+	calculateRisk,
 	getFields,
 	storeField,
 	updateField,
@@ -74,6 +75,7 @@ import {
 import { getLast30DaysRainfall } from '../services/rainfallService.js';
 import { getSoilSummary } from '../services/soilService.js';
 import { getWeatherSummary } from '../services/weatherService.js';
+import { riskColor, riskLabel } from './WaterAllocationPage.jsx';
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -324,6 +326,53 @@ function FieldPanel({ fields, onEdit }) {
 									/>
 								</Stack>
 
+								{field.riskScore != null && (
+									<Box sx={{ mb: 2 }}>
+										<SectionHeader
+											icon={<WaterDropIcon sx={{ fontSize: 16 }} />}
+											title="Risiko Kekeringan"
+										/>
+										<Box
+											sx={{
+												display: 'flex',
+												alignItems: 'center',
+												gap: 1.5,
+												p: 1.5,
+												bgcolor: 'grey.100',
+												borderRadius: 1,
+											}}
+										>
+											<Box
+												sx={{
+													width: 40,
+													height: 40,
+													borderRadius: '50%',
+													bgcolor: riskColor(field.riskScore),
+													display: 'flex',
+													alignItems: 'center',
+													justifyContent: 'center',
+												}}
+											>
+												<Typography
+													variant="caption"
+													fontWeight={800}
+													sx={{ color: 'white', fontSize: 12 }}
+												>
+													{field.riskScore}
+												</Typography>
+											</Box>
+											<Box>
+												<Typography variant="body2" fontWeight={700}>
+													{riskLabel(field.riskScore)}
+												</Typography>
+												<Typography variant="caption" color="text.secondary">
+													Skor dari engine FAO-56
+												</Typography>
+											</Box>
+										</Box>
+									</Box>
+								)}
+
 								{field.description && (
 									<Box
 										sx={{
@@ -521,7 +570,12 @@ export default function Map() {
 		}
 		try {
 			const updated = await updateField(editField.id, editField);
-			setFields((prev) => prev.map((f) => (f.id === updated.id ? updated : f)));
+			calculateRisk(editField)
+				.then((risk) => {
+					const withRisk = { ...updated, riskScore: Math.round(risk.riskScore * 100) };
+					setFields((prev) => prev.map((f) => (f.id === updated.id ? withRisk : f)));
+				})
+				.catch((e) => console.error("risk calc error:", e));
 			setEditField(null);
 			showMsg("Lahan diperbarui", "success");
 		} catch (e) {
@@ -568,6 +622,7 @@ export default function Map() {
 				lon,
 				area_ha,
 				plantingDate: fieldData.plantingDate || null,
+				crop_type: "Padi",
 			};
 
 			const weather = await getWeatherSummary(lat, lon);
@@ -597,9 +652,16 @@ export default function Map() {
 			setFinishedPolygons((prev) => [...prev, points]);
 			setDrawPoints([]);
 			setFieldForm({ name: "", plantingDate: "" });
-			storeField(finalField).catch((e) =>
-				console.error("backend sync error:", e),
-			);
+			storeField(finalField)
+			.then((saved) => {
+				calculateRisk(finalField)
+					.then((risk) => {
+						const withRisk = { ...saved, riskScore: Math.round(risk.riskScore * 100) };
+						setFields((prev) => prev.map((f) => (f.id === saved.id ? withRisk : f)));
+					})
+					.catch((e) => console.error("risk calc error:", e));
+			})
+			.catch((e) => console.error("backend sync error:", e));
 		} catch (e) {
 			console.error("handleDrawn error:", e);
 			showMsg(`Gagal: ${e.message}`, "error");

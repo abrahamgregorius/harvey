@@ -355,7 +355,7 @@ export default function Home() {
             const poly = { getLatLngs: () => [points] }
             const { lat, lon } = getPolygonCentroid(poly)
             const area_ha = calcPolygonAreaHectares(poly)
-            const newField = { name: fieldData.name, lat, lon, area_ha, plantingDate: fieldData.plantingDate || null }
+            const newField = { name: fieldData.name, lat, lon, area_ha, plantingDate: fieldData.plantingDate || null, crop_type: "Padi" }
 
             const weather = await getWeatherSummary(lat, lon)
             const soil = await getSoilSummary(lat, lon)
