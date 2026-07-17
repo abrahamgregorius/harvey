@@ -27,12 +27,12 @@ function MetricTile({ icon, label, value, unit, trend }) {
 	return (
 		<Paper
 			sx={{
-				p: 2.5,
+				p: { xs: 1.5, md: 2.5 },
 				bgcolor: "background.paper",
 				border: "1px solid",
 				borderColor: "divider",
 				borderRadius: 2,
-				minHeight: 110,
+				minHeight: { xs: 90, md: 110 },
 			}}
 		>
 			<Stack spacing={2}>
@@ -43,7 +43,7 @@ function MetricTile({ icon, label, value, unit, trend }) {
 				>
 					<Box
 						sx={{
-							bgcolor: "rgba(46,125,50,0.1)",
+							bgcolor: "rgba(45,106,79,0.1)",
 							borderRadius: 1.5,
 							p: 1,
 							color: "primary.main",
@@ -57,7 +57,7 @@ function MetricTile({ icon, label, value, unit, trend }) {
 					<Typography
 						variant="h4"
 						fontWeight={800}
-						sx={{ color: "text.primary", lineHeight: 1 }}
+						sx={{ color: "text.primary", lineHeight: 1, fontSize: { xs: '1.5rem', md: 'h4' } }}
 					>
 						{value ?? ""}
 					</Typography>
@@ -199,15 +199,15 @@ export function HomePage({ fields, onDelete }) {
 				overflow: "hidden",
 			}}
 		>
-			<Box
-				sx={{
-					px: 3,
-					py: 2.5,
-					borderBottom: "1px solid",
-					borderColor: "divider",
-					bgcolor: "background.paper",
-				}}
-			>
+		<Box
+			sx={{
+				px: { xs: 1.5, md: 3 },
+				py: 2.5,
+				borderBottom: "1px solid",
+				borderColor: "divider",
+				bgcolor: "background.paper",
+			}}
+		>
 				<Typography
 					variant="h5"
 					fontWeight={800}
@@ -223,9 +223,9 @@ export function HomePage({ fields, onDelete }) {
 			<Box
 				sx={{
 					display: "grid",
-					gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+					gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
 					gap: 1,
-					px: 2,
+					px: { xs: 1, md: 2 },
 					py: 2,
 					borderBottom: "1px solid",
 					borderColor: "divider",
@@ -257,7 +257,7 @@ export function HomePage({ fields, onDelete }) {
 				/>
 			</Box>
 
-			<Box sx={{ display: "flex", flex: 1, minHeight: 0, gap: 2, p: 2 }}>
+			<Box sx={{ display: "flex", flexDirection: { xs: "column", md: "row" }, flex: 1, minHeight: 0, gap: 2, p: { xs: 1, md: 2 } }}>
 				<Paper
 					sx={{
 						flex: 1,
@@ -310,7 +310,7 @@ export function HomePage({ fields, onDelete }) {
 						</Stack>
 					</Box>
 				</Paper>
-				<Box sx={{ flex: 2 }}>
+				<Box sx={{ flex: { xs: 1, md: 2 } }}>
 					<GrowthCard fields={fields} />
 				</Box>
 			</Box>
@@ -321,21 +321,21 @@ export function HomePage({ fields, onDelete }) {
 				</Box>
 			)}
 
-			<Paper
-				sx={{
-					mx: 2,
-					mb: 2,
-					bgcolor: "background.paper",
-					border: "1px solid",
-					borderColor: "divider",
-					borderRadius: 2,
-					overflow: "hidden",
-					flex: 1,
-					display: "flex",
-					flexDirection: "column",
-					minHeight: 0,
-				}}
-			>
+		<Paper
+			sx={{
+				mx: { xs: 1, md: 2 },
+				mb: 2,
+				bgcolor: "background.paper",
+				border: "1px solid",
+				borderColor: "divider",
+				borderRadius: 2,
+				overflow: "hidden",
+				flex: 1,
+				display: "flex",
+				flexDirection: "column",
+				minHeight: 0,
+			}}
+		>
 				<Box
 					sx={{
 						px: 2.5,

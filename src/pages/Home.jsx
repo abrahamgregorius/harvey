@@ -75,7 +75,7 @@ function MapClicker({ onClick }) {
 
 const theme = createTheme({
     palette: {
-        primary: { main: '#2e7d32' },
+        primary: { main: '#2D6A4F' },
         background: { default: '#f5f5f5', paper: '#ffffff' },
     },
     typography: {

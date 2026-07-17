@@ -29,7 +29,6 @@ import {
 	Drawer,
 	IconButton,
 	Menu,
-	Popover,
 	Stack,
 	ThemeProvider,
 	Typography,
@@ -53,7 +52,7 @@ import {
 
 const theme = createTheme({
 	palette: {
-		primary: { main: "#2e7d32" },
+		primary: { main: "#2D6A4F" },
 		background: { default: "#f5f5f5", paper: "#ffffff" },
 		text: { primary: "#1a1a2e", secondary: "#6b7280" },
 	},
@@ -140,7 +139,7 @@ function Sidebar({ page, anchorEl, setAnchorEl, isMobile, onClose }) {
 								py: 1,
 								borderRadius: 1.5,
 								color: page === n.key ? "primary.main" : "text.secondary",
-								bgcolor: page === n.key ? "rgba(46,125,50,0.1)" : "transparent",
+								bgcolor: page === n.key ? "rgba(45,106,79,0.1)" : "transparent",
 								fontWeight: page === n.key ? 700 : 500,
 								fontSize: "0.875rem",
 								textTransform: "none",
@@ -209,7 +208,11 @@ function Sidebar({ page, anchorEl, setAnchorEl, isMobile, onClose }) {
 						Buka Peta
 					</Button>
 					<Button
-						onClick={() => { setAnchorEl(null); localStorage.removeItem('supabase-auth-token'); window.location.href = '/login'; }}
+						onClick={() => {
+							setAnchorEl(null);
+							localStorage.removeItem("supabase-auth-token");
+							window.location.href = "/login";
+						}}
 						startIcon={<LogoutIcon sx={{ fontSize: 18 }} />}
 						sx={{
 							justifyContent: "flex-start",
@@ -241,7 +244,7 @@ export default function Dashboard() {
 	const harveyBoxRef = useRef(null);
 	const [drawerOpen, setDrawerOpen] = useState(false);
 	const theme = useTheme();
-	const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+	const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 	const avgRisk =
 		fields.length > 0
 			? Math.round(
@@ -292,7 +295,13 @@ export default function Dashboard() {
 						onClose={() => setDrawerOpen(false)}
 						PaperProps={{ sx: { width: SIDEBAR_W } }}
 					>
-						<Sidebar page={page} anchorEl={anchorEl} setAnchorEl={setAnchorEl} isMobile onClose={() => setDrawerOpen(false)} />
+						<Sidebar
+							page={page}
+							anchorEl={anchorEl}
+							setAnchorEl={setAnchorEl}
+							isMobile
+							onClose={() => setDrawerOpen(false)}
+						/>
 					</Drawer>
 				) : (
 					<Sidebar page={page} anchorEl={anchorEl} setAnchorEl={setAnchorEl} />
@@ -323,7 +332,7 @@ export default function Dashboard() {
 							<IconButton
 								onClick={() => setDrawerOpen(true)}
 								size="small"
-								sx={{ color: 'text.primary' }}
+								sx={{ color: "text.primary" }}
 							>
 								<MenuIcon />
 							</IconButton>
@@ -331,132 +340,15 @@ export default function Dashboard() {
 						<Typography
 							variant="h6"
 							fontWeight={700}
-							sx={{ fontSize: isMobile ? '1rem' : 'h6', whiteSpace: 'nowrap' }}
+							sx={{ fontSize: isMobile ? "1rem" : "h6", whiteSpace: "nowrap" }}
 						>
 							{PAGE_TITLES[page] ?? "Dashboard"}
 						</Typography>
-						{!isMobile && (
+						{/*{!isMobile && (
 							<Typography variant="caption" sx={{ color: "text.secondary" }}>
 								{fields.length} lahan
 							</Typography>
-						)}
-						{avgRisk !== null && !isMobile && (
-							<>
-								<Box
-									onMouseEnter={() => setShowInfo(true)}
-									onMouseLeave={() => setShowInfo(false)}
-									ref={harveyBoxRef}
-									sx={{
-										border: "1px solid",
-										borderColor: "divider",
-										borderRadius: 1.5,
-										px: 1.5,
-										py: 1,
-										cursor: "default",
-										ml: 3,
-									}}
-								>
-									<Stack direction="row" spacing={1} alignItems="center">
-										<Box sx={{ position: "relative", display: "inline-flex" }}>
-											<CircularProgress
-												variant="determinate"
-												value={100}
-												size={36}
-												thickness={5}
-												sx={{ color: "rgba(0,0,0,0.1)", position: "absolute" }}
-											/>
-											<CircularProgress
-												variant="determinate"
-												value={avgRisk}
-												size={36}
-												thickness={5}
-												sx={{
-													color:
-														avgRisk >= 70
-															? "#ef4444"
-															: avgRisk >= 50
-																? "#f97316"
-																: avgRisk >= 30
-																	? "#eab308"
-																	: "#22c55e",
-													"& .MuiCircularProgress-circle": {
-														strokeLinecap: "round",
-													},
-												}}
-											/>
-											<Box
-												sx={{
-													top: 0,
-													left: 0,
-													bottom: 0,
-													right: 0,
-													position: "absolute",
-													display: "flex",
-													alignItems: "center",
-													justifyContent: "center",
-												}}
-											>
-												<Typography
-													variant="caption"
-													fontWeight={800}
-													sx={{ fontSize: 10 }}
-												>
-													{avgRisk}
-												</Typography>
-											</Box>
-										</Box>
-										<Box>
-											<Typography
-												variant="body2"
-												fontWeight={700}
-												sx={{ display: "block", lineHeight: 1.1 }}
-											>
-												Harvey Score
-											</Typography>
-											<Typography
-												variant="body2"
-												color="text.secondary"
-												sx={{ fontSize: 12 }}
-											>
-												Rata-rata
-											</Typography>
-										</Box>
-									</Stack>
-								</Box>
-								<Popover
-									open={showInfo}
-									anchorEl={harveyBoxRef.current}
-									anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-									transformOrigin={{ vertical: "top", horizontal: "center" }}
-									sx={{ mt: -1, pointerEvents: "none" }}
-								>
-									<Box sx={{ px: 1.5, py: 1.5 }}>
-										<Typography
-											variant="body2"
-											fontWeight={700}
-											sx={{ display: "block", mb: 0.5 }}
-										>
-											Tentang Harvey Score
-										</Typography>
-										<Typography
-											variant="body2"
-											sx={{ display: "block", mb: 0.5 }}
-										>
-											Dihitung dari kelangkaan air (curah hujan & suhu), jenis
-											tanah, tahap pertumbuhan tanaman, dan evapotranspirasi.
-										</Typography>
-										<Typography
-											variant="body2"
-											color="text.secondary"
-											sx={{ display: "block", fontSize: 12 }}
-										>
-											Skor tinggi = kebutuhan air tinggi. Digunakan untuk
-											alokasi air panen.
-										</Typography>
-									</Box>
-								</Popover>
-							</>
-						)}
+						)}*/}
 					</Box>
 
 					<Box sx={{ flex: 1, overflow: "auto", minHeight: 0 }}>

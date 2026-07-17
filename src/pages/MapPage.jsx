@@ -188,7 +188,7 @@ export default function MapPage({ fields, onFieldCreate }) {
 
                 {/* Controls */}
                 <Box sx={{
-                    position: 'absolute', bottom: 16, right: 16, zIndex: 600, display: 'flex', flexDirection: 'column', gap: 1, alignItems: 'flex-end',
+                    position: 'absolute', bottom: { xs: 16, md: 16 }, right: { xs: 8, md: 16 }, zIndex: 600, display: 'flex', flexDirection: 'column', gap: 1, alignItems: 'flex-end',
                 }}>
                     {highlightedField && (
                         <Paper
@@ -219,7 +219,7 @@ export default function MapPage({ fields, onFieldCreate }) {
                 </Box>
 
                 <Box sx={{
-                    position: 'absolute', top: 16, right: 16, zIndex: 600, display: 'flex', gap: 1,
+                    position: 'absolute', top: { xs: 8, md: 16 }, right: { xs: 8, md: 16 }, zIndex: 600, display: 'flex', gap: 0.5, flexWrap: 'wrap',
                 }}>
                     <Button
                         startIcon={<UndoIcon />}
@@ -227,7 +227,7 @@ export default function MapPage({ fields, onFieldCreate }) {
                         disabled={drawPoints.length === 0}
                         size="small"
                         variant="contained"
-                        sx={{ bgcolor: 'white', color: 'primary.main', '&:hover': { bgcolor: '#f5f5f5' } }}
+                        sx={{ bgcolor: 'white', color: 'primary.main', '&:hover': { bgcolor: '#f5f5f5' }, minWidth: { xs: 36, md: 'auto' } }}
                     >
                        Undo
                     </Button>
@@ -237,7 +237,7 @@ export default function MapPage({ fields, onFieldCreate }) {
                         disabled={drawPoints.length === 0}
                         size="small"
                         variant="contained"
-                        sx={{ bgcolor: 'white', color: 'error.main', '&:hover': { bgcolor: '#f5f5f5' } }}
+                        sx={{ bgcolor: 'white', color: 'error.main', '&:hover': { bgcolor: '#f5f5f5' }, minWidth: { xs: 36, md: 'auto' } }}
                     >
                         Clear
                     </Button>
@@ -265,13 +265,14 @@ export default function MapPage({ fields, onFieldCreate }) {
 
                 {/* Legend */}
                 <Box sx={{
-                    position: 'absolute', bottom: 16, left: 16, zIndex: 600,
+                    position: 'absolute', bottom: { xs: 60, md: 16 }, left: { xs: 8, md: 16 }, zIndex: 600,
                     bgcolor: 'white', borderRadius: 1.5, px: 1.5, py: 1,
                     boxShadow: '0 1px 4px rgba(0,0,0,0.12)',
+                    display: { xs: 'none', sm: 'block' },
                 }}>
                     <Stack spacing={0.5}>
                         <Stack direction="row" spacing={1} alignItems="center">
-                            <Box sx={{ width: 14, height: 14, border: '2px solid #2e7d32', borderRadius: '2px', bgcolor: 'rgba(46,125,50,0.15)' }} />
+                            <Box sx={{ width: 14, height: 14, border: '2px solid #2e7d32', borderRadius: '2px', bgcolor: 'rgba(45,106,79,0.15)' }} />
                             <Typography variant="caption">Lahan tersimpan</Typography>
                         </Stack>
                         <Stack direction="row" spacing={1} alignItems="center">
@@ -279,7 +280,7 @@ export default function MapPage({ fields, onFieldCreate }) {
                             <Typography variant="caption">Gambar baru</Typography>
                         </Stack>
                         <Stack direction="row" spacing={1} alignItems="center">
-                            <Box sx={{ width: 14, height: 14, border: '2px dashed #0288d1', borderRadius: '2px', bgcolor: 'rgba(2,136,209,0.15)' }} />
+                            <Box sx={{ width: 14, height: 14, border: '2px dashed #2D6A4F', borderRadius: '2px', bgcolor: 'rgba(45,106,79,0.15)' }} />
                             <Typography variant="caption">Baru disimpan</Typography>
                         </Stack>
                     </Stack>

@@ -352,13 +352,13 @@ export function WaterAllocationPage({ fields }) {
 								fontWeight: stageFilter === val ? 700 : 500,
 								borderRadius: "6px",
 								bgcolor:
-									stageFilter === val ? "rgba(46,125,50,0.12)" : "transparent",
-								color: stageFilter === val ? "#2e7d32" : "text.secondary",
-								border: `1px solid ${stageFilter === val ? "#2e7d32" : "rgba(0,0,0,0.18)"}`,
+									stageFilter === val ? "rgba(45,106,79,0.12)" : "transparent",
+								color: stageFilter === val ? "#2D6A4F" : "text.secondary",
+								border: `1px solid ${stageFilter === val ? "#2D6A4F" : "rgba(0,0,0,0.18)"}`,
 								"&:hover": {
 									bgcolor:
 										stageFilter === val
-											? "rgba(46,125,50,0.12)"
+											? "rgba(45,106,79,0.12)"
 											: "rgba(0,0,0,0.04)",
 								},
 							}}
@@ -687,26 +687,26 @@ export function WaterAllocationPage({ fields }) {
 									<Box
 										onClick={() => handleExpand(f)}
 										sx={{
-											px: isMobile ? 1.5 : 3,
+											px: { xs: 1.5, md: 3 },
 											py: 2,
 											borderBottom: isExpanded ? "none" : "1px solid",
 											borderColor: "divider",
 											bgcolor: isExpanded
-												? "rgba(46,125,50,0.04)"
+												? "rgba(45,106,79,0.04)"
 												: idx % 2 === 0
 													? "transparent"
 													: "rgba(0,0,0,0.01)",
 											cursor: "pointer",
 											"&:hover": {
 												bgcolor: isExpanded
-													? "rgba(46,125,50,0.06)"
-													: "rgba(46,125,50,0.04)",
+													? "rgba(45,106,79,0.06)"
+													: "rgba(45,106,79,0.04)",
 											},
 										}}
 									>
-										<Stack direction="row" alignItems="center">
+										<Stack direction="row" alignItems="center" flexWrap="wrap">
 											<Box
-												sx={{ flex: 1, display: "flex", alignItems: "center" }}
+												sx={{ width: { xs: 32, md: 32 }, display: "flex", alignItems: "center", mr: 1.5 }}
 											>
 												<Box
 													sx={{
@@ -724,7 +724,6 @@ export function WaterAllocationPage({ fields }) {
 														display: "flex",
 														alignItems: "center",
 														justifyContent: "center",
-														mr: 1.5,
 													}}
 												>
 													<Typography
@@ -746,17 +745,18 @@ export function WaterAllocationPage({ fields }) {
 															? "rotate(180deg)"
 															: "rotate(0deg)",
 														transition: "transform 0.2s",
+														display: { xs: "none", md: "block" },
 													}}
 												/>
 											</Box>
 											<Typography
 												variant="body2"
 												fontWeight={600}
-												sx={{ flex: 2 }}
+												sx={{ flex: { md: 2 }, minWidth: 0, flexBasis: { xs: "calc(50% - 16px)", md: 0 } }}
 											>
 												{f.name}
 											</Typography>
-											<Box sx={{ flex: 1 }}>
+											<Box sx={{ flex: 1, minWidth: { xs: "calc(50% - 16px)", md: 0 } }}>
 												<Stack direction="row" spacing={1} alignItems="center">
 													<Box
 														sx={{
@@ -784,11 +784,11 @@ export function WaterAllocationPage({ fields }) {
 													{riskLabel(f.riskScore)}
 												</Typography>
 											</Box>
-											<Box sx={{ flex: 1 }}>
+											<Box sx={{ flex: 1, minWidth: { xs: "calc(50% - 16px)", md: 0 } }}>
 												<Typography
 													variant="body2"
 													fontWeight={700}
-													sx={{ color: "#2563eb" }}
+													sx={{ color: "#2D6A4F" }}
 												>
 													{f.waterAlloc_L.toLocaleString("id-ID")} L
 												</Typography>
@@ -836,7 +836,7 @@ export function WaterAllocationPage({ fields }) {
 									<Collapse in={isExpanded} timeout="auto">
 										<Box
 											sx={{
-												px: isMobile ? 1.5 : 3,
+												px: { xs: 1.5, md: 3 },
 												py: 2.5,
 												borderBottom: "1px solid",
 												borderColor: "divider",
@@ -1195,7 +1195,7 @@ export function WaterAllocationPage({ fields }) {
 											<Box
 												sx={{
 													display: "grid",
-													gridTemplateColumns: "1fr 1fr",
+													gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
 													gap: 2,
 												}}
 											>
@@ -1377,16 +1377,16 @@ export function WaterAllocationPage({ fields }) {
 
 				<Box
 					sx={{
-						px: 3,
+						px: { xs: 1.5, md: 3 },
 						py: 2,
 						borderTop: "1px solid",
 						borderColor: "divider",
 						bgcolor: "background.paper",
 					}}
 				>
-					<Stack direction="row" spacing={4}>
+					<Stack direction={{ xs: "column", sm: "row" }} spacing={{ xs: 1, sm: 4 }}>
 						<Stack direction="row" spacing={1} alignItems="center">
-							<WaterIcon sx={{ fontSize: 16, color: "#2563eb" }} />
+							<WaterIcon sx={{ fontSize: 16, color: "#2D6A4F" }} />
 							<Typography variant="body2" fontWeight={600}>
 								Total dialokasikan
 							</Typography>
