@@ -1,4 +1,3 @@
-// ── Open-Meteo (free, no key) — weather + 5-day forecast + elevation ──
 export const ENDPOINTS = {
   openMeteo: {
     current: (lat, lon) =>

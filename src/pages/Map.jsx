@@ -1,5 +1,3 @@
-/** @format */
-
 import 'leaflet/dist/leaflet.css';
 
 import {
@@ -85,7 +83,6 @@ L.Icon.Default.mergeOptions({
 	shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
 });
 
-// ── Map center updater ───────────────────────────────────────────────────────
 function MapUpdater({ center, zoom }) {
 	const map = useMap();
 	useEffect(() => {
@@ -94,7 +91,6 @@ function MapUpdater({ center, zoom }) {
 	return null;
 }
 
-// ── Map click handler ─────────────────────────────────────────────────────────
 function MapClicker({ onClick }) {
 	const map = useMap();
 	useEffect(() => {
@@ -123,7 +119,6 @@ const theme = createTheme({
 	},
 });
 
-// ── Section header ───────────────────────────────────────────────────────────
 function SectionHeader({ icon, title }) {
 	return (
 		<Stack direction="row" alignItems="center" spacing={1} mb={1.5}>
@@ -144,7 +139,6 @@ function SectionHeader({ icon, title }) {
 	);
 }
 
-// ── Data row ─────────────────────────────────────────────────────────────────
 function DataRow({ icon, label, value, unit = "" }) {
 	if (value == null || value === "") return null;
 	return (
@@ -161,7 +155,6 @@ function DataRow({ icon, label, value, unit = "" }) {
 	);
 }
 
-// ── Stat card ────────────────────────────────────────────────────────────────
 function StatCard({ icon, label, value, unit = "", highlight = false }) {
 	return (
 		<Box
@@ -198,7 +191,6 @@ function StatCard({ icon, label, value, unit = "", highlight = false }) {
 	);
 }
 
-// ── Field panel ──────────────────────────────────────────────────────────────
 function FieldPanel({ fields, onEdit }) {
 	const [collapsed, setCollapsed] = useState(new Set());
 	const toggle = (idx) => {
@@ -517,7 +509,6 @@ function FieldPanel({ fields, onEdit }) {
 	);
 }
 
-// ── Home ─────────────────────────────────────────────────────────────────────
 export default function Map() {
 	const [fields, setFields] = useState([]);
 	const [loading, setLoading] = useState(false);

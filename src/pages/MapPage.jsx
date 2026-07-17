@@ -31,7 +31,6 @@ import { getWeatherSummary } from '../services/weatherService.js'
 import { getSoilSummary } from '../services/soilService.js'
 import { getLast30DaysRainfall } from '../services/rainfallService.js'
 
-// ── Map center updater ───────────────────────────────────────────────────────
 function MapUpdater({ center, zoom }) {
     const map = useMap()
     useEffect(() => {
@@ -40,7 +39,6 @@ function MapUpdater({ center, zoom }) {
     return null
 }
 
-// ── Map click handler ─────────────────────────────────────────────────────────
 function MapClicker({ onClick }) {
     const map = useMap()
     useEffect(() => {
@@ -61,7 +59,7 @@ export default function MapPage({ fields, onFieldCreate }) {
     const [showFieldModal, setShowFieldModal] = useState(false)
     const [fieldForm, setFieldForm] = useState({ name: '', plantingDate: '' })
     const [saving, setSaving] = useState(false)
-    const [highlightedField, setHighlightedField] = useState(null) // polygon just created
+    const [highlightedField, setHighlightedField] = useState(null)
     const nameInputRef = useRef(null)
 
     useEffect(() => {

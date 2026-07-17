@@ -132,7 +132,7 @@ export function FieldsPage({ fields, onDelete, onUpdate }) {
                                             </IconButton>
                                         </Stack>
 
-                                        {/* Expanded detail panel */}
+
                                         <Collapse in={isExpanded} timeout="auto">
                                             <Box sx={{ display: 'flex', gap: 2, p: 2, borderBottom: '1px solid', borderColor: 'divider', bgcolor: 'rgba(0,0,0,0.01)' }}>
                                                 <Box sx={{ width: 220, height: 160, borderRadius: 1, overflow: 'hidden', flexShrink: 0, bgcolor: 'grey.100' }}>

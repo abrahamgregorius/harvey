@@ -1,6 +1,5 @@
 import * as turf from '@turf/turf'
 
-/** Get browser geolocation — returns {lat, lon} or throws */
 export function getBrowserLocation() {
   return new Promise((resolve, reject) => {
     if (!navigator.geolocation) {
@@ -15,20 +14,15 @@ export function getBrowserLocation() {
   })
 }
 
-/**
- * Calculate polygon area in hectares from Leaflet layer.
- * Expects a Leaflet Polygon layer (has getLatLngs()).
- */
 export function calcPolygonAreaHectares(polygonLayer) {
-  const coords = polygonLayer.getLatLngs()[0] // outer ring
+  const coords = polygonLayer.getLatLngs()[0]
   const ring = coords.map((c) => [c.lng, c.lat])
-  ring.push(ring[0]) // close
+  ring.push(ring[0])
   const poly = turf.polygon([ring])
   const sqMeters = turf.area(poly)
-  return sqMeters / 10000 // ha
+  return sqMeters / 10000
 }
 
-/** Get centroid of polygon layer as {lat, lon} */
 export function getPolygonCentroid(polygonLayer) {
   const coords = polygonLayer.getLatLngs()[0]
   const ring = coords.map((c) => [c.lng, c.lat])
@@ -38,10 +32,6 @@ export function getPolygonCentroid(polygonLayer) {
   return { lat: centroid.geometry.coordinates[1], lon: centroid.geometry.coordinates[0] }
 }
 
-/**
- * Calculate polygon area in hectares from raw lat/lng array.
- * Expects array of {lat, lng} objects.
- */
 export function calcAreaFromPoints(points) {
   if (!points || points.length < 3) return 0
   const ring = points.map((c) => [c.lng, c.lat])
@@ -50,9 +40,6 @@ export function calcAreaFromPoints(points) {
   return turf.area(poly) / 10000
 }
 
-/**
- * Get centroid {lat, lon} from raw lat/lng array.
- */
 export function calcCentroidFromPoints(points) {
   if (!points || points.length < 3) return { lat: 0, lon: 0 }
   const ring = points.map((c) => [c.lng, c.lat])
@@ -62,9 +49,7 @@ export function calcCentroidFromPoints(points) {
   return { lat: centroid.geometry.coordinates[1], lon: centroid.geometry.coordinates[0] }
 }
 
-/** Calculate slope (%) from three points forming a triangle */
 export function calcSlope(pointA, pointB, pointC) {
-  // slope from A to B, C is reference elevation
   const line = turf.lineString([[pointA.lon, pointA.lat], [pointB.lon, pointB.lat]])
   const elevationDiff = pointB.elevation - pointA.elevation
   const distance = turf.length(line, { units: 'meters' })
