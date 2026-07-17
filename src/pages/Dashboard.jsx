@@ -19,17 +19,22 @@ import LeaderboardIcon from '@mui/icons-material/Leaderboard';
 import ListIcon from '@mui/icons-material/List';
 import LogoutIcon from '@mui/icons-material/Logout';
 import MapAltIcon from '@mui/icons-material/Map';
+import MenuIcon from '@mui/icons-material/Menu';
 import {
 	Box,
 	Button,
 	CircularProgress,
 	createTheme,
 	CssBaseline,
+	Drawer,
+	IconButton,
 	Menu,
 	Popover,
 	Stack,
 	ThemeProvider,
 	Typography,
+	useMediaQuery,
+	useTheme,
 } from '@mui/material';
 
 import {
@@ -81,7 +86,7 @@ const PAGE_TITLES = {
 	analytics: "Analisis",
 };
 
-function Sidebar({ page, anchorEl, setAnchorEl }) {
+function Sidebar({ page, anchorEl, setAnchorEl, isMobile, onClose }) {
 	return (
 		<Box
 			sx={{
@@ -117,6 +122,7 @@ function Sidebar({ page, anchorEl, setAnchorEl }) {
 							key={n.key}
 							component={Link}
 							to={`/dashboard/${n.key}`}
+							onClick={isMobile ? onClose : undefined}
 							startIcon={
 								<Box
 									sx={{
@@ -235,6 +241,9 @@ export default function Dashboard() {
 	const [showInfo, setShowInfo] = useState(false);
 	const [anchorEl, setAnchorEl] = useState(null);
 	const harveyBoxRef = useRef(null);
+	const [drawerOpen, setDrawerOpen] = useState(false);
+	const theme = useTheme();
+	const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 	const avgRisk =
 		fields.length > 0
 			? Math.round(
@@ -279,7 +288,17 @@ export default function Dashboard() {
 			<Box
 				sx={{ height: "100vh", display: "flex", bgcolor: "background.default" }}
 			>
-				<Sidebar page={page} anchorEl={anchorEl} setAnchorEl={setAnchorEl} />
+				{isMobile ? (
+					<Drawer
+						open={drawerOpen}
+						onClose={() => setDrawerOpen(false)}
+						PaperProps={{ sx: { width: SIDEBAR_W } }}
+					>
+						<Sidebar page={page} anchorEl={anchorEl} setAnchorEl={setAnchorEl} isMobile onClose={() => setDrawerOpen(false)} />
+					</Drawer>
+				) : (
+					<Sidebar page={page} anchorEl={anchorEl} setAnchorEl={setAnchorEl} />
+				)}
 				<Box
 					sx={{
 						flex: 1,
@@ -290,8 +309,8 @@ export default function Dashboard() {
 				>
 					<Box
 						sx={{
-							px: 3,
-							py: 2,
+							px: isMobile ? 1.5 : 3,
+							py: 1.5,
 							borderBottom: "1px solid",
 							borderColor: "divider",
 							bgcolor: "background.paper",
@@ -299,21 +318,31 @@ export default function Dashboard() {
 							alignItems: "center",
 							justifyContent: "space-between",
 							flexShrink: 0,
+							gap: 1,
 						}}
 					>
-						<Typography variant="h6" fontWeight={700}>
+						{isMobile && (
+							<IconButton
+								onClick={() => setDrawerOpen(true)}
+								size="small"
+								sx={{ color: 'text.primary' }}
+							>
+								<MenuIcon />
+							</IconButton>
+						)}
+						<Typography
+							variant="h6"
+							fontWeight={700}
+							sx={{ fontSize: isMobile ? '1rem' : 'h6', whiteSpace: 'nowrap' }}
+						>
 							{PAGE_TITLES[page] ?? "Dashboard"}
 						</Typography>
-						<Typography variant="caption" sx={{ color: "text.secondary" }}>
-							{fields.length} lahan ·{" "}
-							{new Date().toLocaleDateString("id-ID", {
-								weekday: "long",
-								day: "numeric",
-								month: "long",
-								year: "numeric",
-							})}
-						</Typography>
-						{avgRisk !== null && (
+						{!isMobile && (
+							<Typography variant="caption" sx={{ color: "text.secondary" }}>
+								{fields.length} lahan
+							</Typography>
+						)}
+						{avgRisk !== null && !isMobile && (
 							<>
 								<Box
 									onMouseEnter={() => setShowInfo(true)}
