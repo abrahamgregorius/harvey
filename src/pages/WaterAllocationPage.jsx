@@ -1,3 +1,5 @@
+/** @format */
+
 import {
 	useEffect,
 	useState,
@@ -21,6 +23,8 @@ import {
 	Stack,
 	Tooltip,
 	Typography,
+	useMediaQuery,
+	useTheme,
 } from '@mui/material';
 
 import {
@@ -31,7 +35,7 @@ import { getGrowthStage } from '../utils/growthUtils';
 
 function shareToWhatsApp(ranked) {
 	const lines = [
-		"🌊 Jadwal Irigasi Priority — HARVEY",
+		"Jadwal Irigasi Priority",
 		`Total: ${ranked.reduce((s, f) => s + f.waterAlloc_L, 0).toLocaleString("id-ID")} L untuk ${ranked.length} lahan`,
 		"",
 	];
@@ -134,6 +138,8 @@ export function WaterAllocationPage({ fields }) {
 	const [riskScoreMap, setRiskScoreMap] = useState({});
 	const [historyMap, setHistoryMap] = useState({});
 	const [loading, setLoading] = useState(false);
+	const theme = useTheme();
+	const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
 	useEffect(() => {
 		if (!fields.length) return;
@@ -240,49 +246,56 @@ export function WaterAllocationPage({ fields }) {
 			>
 				<Box
 					sx={{
-						px: 3,
-						py: 2.5,
+						px: isMobile ? 1.5 : 3,
+						py: 2,
 						borderBottom: "1px solid",
 						borderColor: "divider",
 						bgcolor: "background.paper",
 						display: "flex",
 						justifyContent: "space-between",
-						alignItems: "center",
+						alignItems: "flex-start",
+						flexDirection: isMobile ? 'column' : 'row',
+						gap: 1,
 					}}
 				>
 					<Box>
-						<Typography variant="h5" fontWeight={800}>
-							Alokasi Air berdasarkan Skor Risiko
+						<Typography
+							variant={isMobile ? "h6" : "h5"}
+							fontWeight={800}
+							sx={{ fontSize: isMobile ? '1rem' : 'h5' }}
+						>
+							Alokasi Air
 						</Typography>
 						<Typography
 							variant="body2"
 							sx={{ color: "text.secondary", mt: 0.5 }}
 						>
-							Menampilkan {filtered.length} dari {fields.length} lahan · Total{" "}
-							{totalWater.toLocaleString("id-ID")} L tersedia
+							{filtered.length} lahan · {totalWater.toLocaleString("id-ID")} L
 						</Typography>
 					</Box>
-					<IconButton
-						onClick={() => shareToWhatsApp(filtered)}
-						sx={{
-							color: "#25D366",
-							bgcolor: "#e8f5e9",
-							"&:hover": { bgcolor: "#c8e6c9" },
-						}}
-						size="small"
-					>
-						<ShareIcon fontSize="small" />
-					</IconButton>
+					{!isMobile && (
+						<IconButton
+							onClick={() => shareToWhatsApp(filtered)}
+							sx={{
+								color: "#25D366",
+								bgcolor: "#e8f5e9",
+								"&:hover": { bgcolor: "#c8e6c9" },
+							}}
+							size="small"
+						>
+							<ShareIcon fontSize="small" />
+						</IconButton>
+					)}
 				</Box>
 
 				<Box
 					sx={{
-						px: 3,
+						px: isMobile ? 1.5 : 3,
 						py: 1.5,
 						borderBottom: "1px solid",
 						borderColor: "divider",
 						display: "flex",
-						gap: 1.5,
+						gap: 1,
 						flexWrap: "wrap",
 						alignItems: "center",
 					}}
@@ -355,7 +368,7 @@ export function WaterAllocationPage({ fields }) {
 
 				<Box
 					sx={{
-						px: 3,
+						px: isMobile ? 1.5 : 3,
 						py: 1.5,
 						borderBottom: "1px solid",
 						borderColor: "divider",
@@ -567,40 +580,42 @@ export function WaterAllocationPage({ fields }) {
 
 				<Box sx={{ flex: 1, overflow: "auto" }}>
 					<Stack spacing={0}>
-						<Stack
-							direction="row"
-							sx={{
-								px: 3,
-								py: 1.5,
-								borderBottom: "1px solid",
-								borderColor: "divider",
-								bgcolor: "rgba(0,0,0,0.02)",
-							}}
-						>
-							{[
-								"#",
-								"Lahan",
-								"Skor Risiko",
-								"Kebutuhan Air",
-								"Luas",
-								"Tahap",
-								"Faktor Utama",
-							].map((h) => (
-								<Typography
-									key={h}
-									variant="caption"
-									fontWeight={700}
-									sx={{
-										color: "text.secondary",
-										textTransform: "uppercase",
-										letterSpacing: 0.8,
-										flex: h === "Lahan" ? 2 : 1,
-									}}
-								>
-									{h}
-								</Typography>
-							))}
-						</Stack>
+						{!isMobile && (
+							<Stack
+								direction="row"
+								sx={{
+									px: 3,
+									py: 1.5,
+									borderBottom: "1px solid",
+									borderColor: "divider",
+									bgcolor: "rgba(0,0,0,0.02)",
+								}}
+							>
+								{[
+									"#",
+									"Lahan",
+									"Skor Risiko",
+									"Kebutuhan Air",
+									"Luas",
+									"Tahap",
+									"Faktor Utama",
+								].map((h) => (
+									<Typography
+										key={h}
+										variant="caption"
+										fontWeight={700}
+										sx={{
+											color: "text.secondary",
+											textTransform: "uppercase",
+											letterSpacing: 0.8,
+											flex: h === "Lahan" ? 2 : 1,
+										}}
+									>
+										{h}
+									</Typography>
+								))}
+							</Stack>
+						)}
 
 						{filtered.map((f, idx) => {
 							const g = getGrowthStage(f.plantingDate);
@@ -672,7 +687,7 @@ export function WaterAllocationPage({ fields }) {
 									<Box
 										onClick={() => handleExpand(f)}
 										sx={{
-											px: 3,
+											px: isMobile ? 1.5 : 3,
 											py: 2,
 											borderBottom: isExpanded ? "none" : "1px solid",
 											borderColor: "divider",
@@ -781,7 +796,10 @@ export function WaterAllocationPage({ fields }) {
 													{(f.waterAlloc_L / f.area_ha || 0).toFixed(0)} L/ha
 												</Typography>
 											</Box>
-											<Typography variant="body2" sx={{ flex: 1 }}>
+											<Typography
+												variant="body2"
+												sx={{ flex: 1, display: { xs: 'none', md: 'block' } }}
+											>
 												{f.area_ha?.toFixed(2)} ha
 											</Typography>
 											<Box sx={{ flex: 1 }}>
@@ -808,7 +826,7 @@ export function WaterAllocationPage({ fields }) {
 											<Typography
 												variant="caption"
 												color="text.secondary"
-												sx={{ flex: 1 }}
+												sx={{ flex: 1, display: { xs: 'none', lg: 'block' } }}
 											>
 												{factorStr}
 											</Typography>
@@ -818,7 +836,7 @@ export function WaterAllocationPage({ fields }) {
 									<Collapse in={isExpanded} timeout="auto">
 										<Box
 											sx={{
-												px: 3,
+												px: isMobile ? 1.5 : 3,
 												py: 2.5,
 												borderBottom: "1px solid",
 												borderColor: "divider",
