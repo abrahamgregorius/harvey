@@ -3,19 +3,22 @@ import { Link, useParams } from 'react-router-dom'
 import {
     createTheme, ThemeProvider, CssBaseline,
     Box, Typography, Stack, Button,
-    CircularProgress, Popover,
+    CircularProgress, Popover, Menu,
 } from '@mui/material'
 import LayersIcon from '@mui/icons-material/Layers'
 import DashboardIcon from '@mui/icons-material/Dashboard'
 import MapAltIcon from '@mui/icons-material/Map'
+import LogoutIcon from '@mui/icons-material/Logout'
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import ListIcon from '@mui/icons-material/List'
 import BarChartIcon from '@mui/icons-material/BarChart'
 import LeaderboardIcon from '@mui/icons-material/Leaderboard'
-import { getFields, deleteField } from '../services/fieldStore.js'
+import { getFields, storeField, deleteField } from '../services/fieldStore.js'
 import { HomePage } from './HomePage.jsx'
 import { FieldsPage } from './FieldsPage.jsx'
 import { WaterAllocationPage, calcRiskScore } from './WaterAllocationPage.jsx'
 import { AnalyticsPage } from './AnalyticsPage.jsx'
+import MapPage from './MapPage.jsx'
 
 const theme = createTheme({
     palette: {
@@ -38,6 +41,7 @@ const NAV = [
     { key: 'home', icon: <DashboardIcon />, label: 'Home' },
     { key: 'fields', icon: <ListIcon />, label: 'Daftar Lahan' },
     { key: 'water', icon: <LeaderboardIcon />, label: 'Alokasi Air' },
+    { key: 'map', icon: <MapAltIcon />, label: 'Peta' },
     { key: 'analytics', icon: <BarChartIcon />, label: 'Analisis' },
 ]
 
@@ -45,10 +49,11 @@ const PAGE_TITLES = {
     home: 'Home',
     fields: 'Daftar Lahan',
     water: 'Alokasi Air',
+    map: 'Peta',
     analytics: 'Analisis',
 }
 
-function Sidebar({ page }) {
+function Sidebar({ page, anchorEl, setAnchorEl }) {
     return (
         <Box sx={{
             width: SIDEBAR_W,
@@ -116,8 +121,8 @@ function Sidebar({ page }) {
 
             <Box sx={{ px: 1.5, py: 2, borderTop: '1px solid', borderColor: 'divider' }}>
                 <Button
-                    component={Link}
-                    to="/app"
+                    onClick={(e) => setAnchorEl(e.currentTarget)}
+                    endIcon={<ExpandMoreIcon sx={{ fontSize: 16 }} />}
                     startIcon={<MapAltIcon sx={{ fontSize: 20 }} />}
                     sx={{
                         justifyContent: 'flex-start',
@@ -131,8 +136,55 @@ function Sidebar({ page }) {
                         width: '100%',
                     }}
                 >
-                    Buka Peta
+                    User
                 </Button>
+                <Menu
+                    anchorEl={anchorEl}
+                    open={Boolean(anchorEl)}
+                    onClose={() => setAnchorEl(null)}
+                    anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+                    transformOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+                    sx={{ mb: 0.5 }}
+                >
+                    <Button
+                        component={Link}
+                        to="/app"
+                        onClick={() => setAnchorEl(null)}
+                        startIcon={<MapAltIcon sx={{ fontSize: 18 }} />}
+                        sx={{
+                            justifyContent: 'flex-start',
+                            px: 2, py: 1,
+                            borderRadius: 0,
+                            color: 'text.primary',
+                            fontWeight: 500,
+                            fontSize: '0.875rem',
+                            textTransform: 'none',
+                            width: '100%',
+                            '&:hover': { bgcolor: 'rgba(0,0,0,0.04)' },
+                        }}
+                    >
+                        Buka Peta
+                    </Button>
+                    <Button
+                        component={Link}
+                        to="/"
+                        onClick={() => setAnchorEl(null)}
+                        startIcon={<LogoutIcon sx={{ fontSize: 18 }} />}
+                        sx={{
+                            justifyContent: 'flex-start',
+                            px: 2, py: 1,
+                            borderRadius: 0,
+                            color: 'text.primary',
+                            fontWeight: 500,
+                            fontSize: '0.875rem',
+                            textTransform: 'none',
+                            width: '100%',
+                            '&:hover': { bgcolor: 'rgba(0,0,0,0.04)' },
+                        }}
+                    >
+                        Logout
+                    </Button>
+                </Menu>
             </Box>
         </Box>
     )
@@ -143,6 +195,7 @@ export default function Dashboard() {
     const [fields, setFields] = useState([])
     const [loading, setLoading] = useState(true)
     const [showInfo, setShowInfo] = useState(false)
+    const [anchorEl, setAnchorEl] = useState(null)
     const harveyBoxRef = useRef(null)
     const avgRisk = fields.length > 0 ? Math.round(fields.reduce((s, f) => s + calcRiskScore(f), 0) / fields.length) : null
 
@@ -157,6 +210,13 @@ export default function Dashboard() {
         } catch (e) { console.error(e) }
     }
 
+    async function handleFieldCreate(fieldData) {
+        try {
+            const saved = await storeField(fieldData)
+            setFields(prev => [...prev, saved])
+        } catch (e) { console.error(e) }
+    }
+
     function handleUpdate(updated) {
         setFields(prev => prev.map(f => f.id === updated.id ? updated : f))
     }
@@ -165,7 +225,7 @@ export default function Dashboard() {
         <ThemeProvider theme={theme}>
             <CssBaseline />
             <Box sx={{ height: '100vh', display: 'flex', bgcolor: 'background.default' }}>
-                <Sidebar page={page} />
+                <Sidebar page={page} anchorEl={anchorEl} setAnchorEl={setAnchorEl} />
                 <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
                     <Box sx={{
                         px: 3, py: 2,
@@ -254,6 +314,8 @@ export default function Dashboard() {
                             <FieldsPage fields={fields} onDelete={handleDelete} onUpdate={handleUpdate} />
                         ) : page === 'water' ? (
                             <WaterAllocationPage fields={fields} />
+                        ) : page === 'map' ? (
+                            <MapPage fields={fields} onFieldCreate={handleFieldCreate} />
                         ) : page === 'analytics' ? (
                             <AnalyticsPage />
                         ) : null}

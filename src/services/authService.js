@@ -1,0 +1,28 @@
+import { createClient } from '@supabase/supabase-js'
+
+const supabase = createClient(
+  import.meta.env.VITE_SUPABASE_URL,
+  import.meta.env.VITE_SUPABASE_ANON_KEY
+)
+
+export async function signInWithPassword(email, password) {
+  return supabase.auth.signInWithPassword({ email, password })
+}
+
+export async function signInWithOAuth(provider = 'google') {
+  return supabase.auth.signInWithOAuth({ provider })
+}
+
+export async function signOut() {
+  return supabase.auth.signOut()
+}
+
+export async function getSession() {
+  return supabase.auth.getSession()
+}
+
+export function onAuthStateChange(callback) {
+  return supabase.auth.onAuthStateChange(callback)
+}
+
+export { supabase }

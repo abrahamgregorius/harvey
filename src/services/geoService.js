@@ -38,6 +38,30 @@ export function getPolygonCentroid(polygonLayer) {
   return { lat: centroid.geometry.coordinates[1], lon: centroid.geometry.coordinates[0] }
 }
 
+/**
+ * Calculate polygon area in hectares from raw lat/lng array.
+ * Expects array of {lat, lng} objects.
+ */
+export function calcAreaFromPoints(points) {
+  if (!points || points.length < 3) return 0
+  const ring = points.map((c) => [c.lng, c.lat])
+  ring.push(ring[0])
+  const poly = turf.polygon([ring])
+  return turf.area(poly) / 10000
+}
+
+/**
+ * Get centroid {lat, lon} from raw lat/lng array.
+ */
+export function calcCentroidFromPoints(points) {
+  if (!points || points.length < 3) return { lat: 0, lon: 0 }
+  const ring = points.map((c) => [c.lng, c.lat])
+  ring.push(ring[0])
+  const poly = turf.polygon([ring])
+  const centroid = turf.centroid(poly)
+  return { lat: centroid.geometry.coordinates[1], lon: centroid.geometry.coordinates[0] }
+}
+
 /** Calculate slope (%) from three points forming a triangle */
 export function calcSlope(pointA, pointB, pointC) {
   // slope from A to B, C is reference elevation

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Stack, Box, Typography, Paper, IconButton, Button, Dialog, DialogTitle, DialogContent, DialogActions, TextField, FormControl, InputLabel, OutlinedInput, Collapse } from '@mui/material'
+import { Stack, Box, Typography, Paper, IconButton, Button, Dialog, DialogTitle, DialogContent, DialogActions, TextField, FormControl, InputLabel, OutlinedInput, Collapse, DialogContentText } from '@mui/material'
 import MapAltIcon from '@mui/icons-material/Map'
 import DeleteIcon from '@mui/icons-material/Delete'
 import EditIcon from '@mui/icons-material/Edit'
@@ -22,6 +22,7 @@ export { getGrowthStage }
 export function FieldsPage({ fields, onDelete, onUpdate }) {
     const [editField, setEditField] = useState(null)
     const [expandedId, setExpandedId] = useState(null)
+    const [confirmSave, setConfirmSave] = useState(false)
 
     const handleEditOpen = (field, e) => {
         e.stopPropagation()
@@ -42,6 +43,16 @@ export function FieldsPage({ fields, onDelete, onUpdate }) {
         } catch (e) {
             console.error(e)
         }
+    }
+
+    const handleSaveClick = () => {
+        if (!editField?.name?.trim()) return
+        setConfirmSave(true)
+    }
+
+    const handleConfirmYes = async () => {
+        setConfirmSave(false)
+        await handleEditSave()
     }
 
     return (
@@ -199,7 +210,21 @@ export function FieldsPage({ fields, onDelete, onUpdate }) {
                 </DialogContent>
                 <DialogActions sx={{ px: 3, pb: 2 }}>
                     <Button onClick={() => setEditField(null)} color="inherit" size="small">Batal</Button>
-                    <Button onClick={handleEditSave} variant="contained" size="small">Simpan</Button>
+                    <Button onClick={handleSaveClick} variant="contained" size="small">Simpan</Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* Confirmation dialog */}
+            <Dialog open={confirmSave} onClose={() => setConfirmSave(false)} maxWidth="xs" fullWidth>
+                <DialogTitle fontWeight={700}>Konfirmasi</DialogTitle>
+                <DialogContent>
+                    <DialogContentText>
+                        Simpan perubahan untuk "{editField?.name}"?
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions sx={{ px: 3, pb: 2 }}>
+                    <Button onClick={() => setConfirmSave(false)} color="inherit" size="small">Batal</Button>
+                    <Button onClick={handleConfirmYes} variant="contained" size="small">Ya</Button>
                 </DialogActions>
             </Dialog>
         </Box>

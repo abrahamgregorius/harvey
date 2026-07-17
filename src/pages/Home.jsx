@@ -552,7 +552,8 @@ export default function Home() {
                 <Dialog open={showFieldModal} onClose={handleModalClose} maxWidth="xs" fullWidth>
                     <DialogTitle fontWeight={700}>Simpan Lahan</DialogTitle>
                     <DialogContent>
-                        <DialogContentText className="mb-2">Lengkapi info lahan sebelum menyimpan.</DialogContentText>
+                        <DialogContentText className="">Lengkapi info lahan sebelum menyimpan.</DialogContentText>
+                        <Box className="h-2"></Box>
                         <Stack spacing={2} mt={1}>
                             <TextField
                                 inputRef={nameInputRef}
