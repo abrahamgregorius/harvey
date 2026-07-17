@@ -196,7 +196,7 @@ export function WaterAllocationPage({ fields }) {
                                         '& .MuiSlider-rail': { bgcolor: 'rgba(239,68,68,0.15)', height: 6, borderRadius: 3 },
                                         '& .MuiSlider-thumb': { bgcolor: elNinoSeverity > 5 ? '#ef4444' : '#f97316', width: 16, height: 16, '&:hover': { boxShadow: `0 0 0 6px rgba(239,68,68,0.16)` } },
                                         '& .MuiSlider-mark': { width: 6, height: 6, borderRadius: '50%', bgcolor: 'rgba(239,68,68,0.3)' },
-                                        '& .MuiSlider-markLabel': { transform: 'translateX(-0.5rem)' },
+                                        '& .MuiSlider-markLabel': { transform: 'translateX(-2rem)' },
                                     }}
                                     valueLabelFormat={v => v === 0 ? 'Normal' : `Lv ${v}`}
                                 />

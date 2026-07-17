@@ -53,7 +53,7 @@ export function FieldsPage({ fields, onDelete, onUpdate }) {
                         {fields.length} lahan · {new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
                     </Typography>
                 </Box>
-                <Button component={Link} to="/" variant="contained" size="small" startIcon={<MapAltIcon />}>
+                <Button component={Link} to="/app" variant="contained" size="small" startIcon={<MapAltIcon />}>
                     Tambah Lahan
                 </Button>
             </Box>

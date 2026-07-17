@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import {
     createTheme, ThemeProvider, CssBaseline,
     Box, Typography, Stack, Button,
-    CircularProgress,
+    CircularProgress, Popover,
 } from '@mui/material'
 import LayersIcon from '@mui/icons-material/Layers'
 import DashboardIcon from '@mui/icons-material/Dashboard'
@@ -142,6 +142,8 @@ export default function Dashboard() {
     const { page = 'home' } = useParams()
     const [fields, setFields] = useState([])
     const [loading, setLoading] = useState(true)
+    const [showInfo, setShowInfo] = useState(false)
+    const harveyBoxRef = useRef(null)
     const avgRisk = fields.length > 0 ? Math.round(fields.reduce((s, f) => s + calcRiskScore(f), 0) / fields.length) : null
 
     useEffect(() => {
@@ -180,31 +182,64 @@ export default function Dashboard() {
                             {fields.length} lahan · {new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
                         </Typography>
                         {avgRisk !== null && (
-                            <Stack direction="row" spacing={1} alignItems="center" sx={{ ml: 3 }}>
-                                <Box sx={{ position: 'relative', display: 'inline-flex' }}>
-                                    <CircularProgress
-                                        variant="determinate"
-                                        value={100}
-                                        size={36}
-                                        thickness={5}
-                                        sx={{ color: 'rgba(0,0,0,0.1)', position: 'absolute' }}
-                                    />
-                                    <CircularProgress
-                                        variant="determinate"
-                                        value={avgRisk}
-                                        size={36}
-                                        thickness={5}
-                                        sx={{ color: avgRisk >= 70 ? '#ef4444' : avgRisk >= 50 ? '#f97316' : avgRisk >= 30 ? '#eab308' : '#22c55e', '& .MuiCircularProgress-circle': { strokeLinecap: 'round' } }}
-                                    />
-                                    <Box sx={{ top: 0, left: 0, bottom: 0, right: 0, position: 'absolute', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                        <Typography variant="caption" fontWeight={800} sx={{ fontSize: 10 }}>{avgRisk}</Typography>
+                            <>
+                                <Box
+                                    onMouseEnter={() => setShowInfo(true)}
+                                    onMouseLeave={() => setShowInfo(false)}
+                                    ref={harveyBoxRef}
+                                    sx={{
+                                        border: '1px solid',
+                                        borderColor: 'divider',
+                                        borderRadius: 1.5,
+                                        px: 1.5, py: 1,
+                                        cursor: 'default',
+                                        ml: 3,
+                                    }}
+                                >
+                                    <Stack direction="row" spacing={1} alignItems="center">
+                                        <Box sx={{ position: 'relative', display: 'inline-flex' }}>
+                                            <CircularProgress
+                                                variant="determinate"
+                                                value={100}
+                                                size={36}
+                                                thickness={5}
+                                                sx={{ color: 'rgba(0,0,0,0.1)', position: 'absolute' }}
+                                            />
+                                            <CircularProgress
+                                                variant="determinate"
+                                                value={avgRisk}
+                                                size={36}
+                                                thickness={5}
+                                                sx={{ color: avgRisk >= 70 ? '#ef4444' : avgRisk >= 50 ? '#f97316' : avgRisk >= 30 ? '#eab308' : '#22c55e', '& .MuiCircularProgress-circle': { strokeLinecap: 'round' } }}
+                                            />
+                                            <Box sx={{ top: 0, left: 0, bottom: 0, right: 0, position: 'absolute', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                <Typography variant="caption" fontWeight={800} sx={{ fontSize: 10 }}>{avgRisk}</Typography>
+                                            </Box>
+                                        </Box>
+                                        <Box>
+                                            <Typography variant="body2" fontWeight={700} sx={{ display: 'block', lineHeight: 1.1 }}>Harvey Score</Typography>
+                                            <Typography variant="body2" color="text.secondary" sx={{ fontSize: 12 }}>Rata-rata</Typography>
+                                        </Box>
+                                    </Stack>
+                                </Box>
+                                <Popover
+                                    open={showInfo}
+                                    anchorEl={harveyBoxRef.current}
+                                    anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+                                    transformOrigin={{ vertical: 'top', horizontal: 'center' }}
+                                    sx={{ mt: -1, pointerEvents: 'none' }}
+                                >
+                                    <Box sx={{ px: 1.5, py: 1.5 }}>
+                                        <Typography variant="body2" fontWeight={700} sx={{ display: 'block', mb: 0.5 }}>Tentang Harvey Score</Typography>
+                                        <Typography variant="body2" sx={{ display: 'block', mb: 0.5 }}>
+                                            Dihitung dari kelangkaan air (curah hujan & suhu), jenis tanah, tahap pertumbuhan tanaman, dan evapotranspirasi.
+                                        </Typography>
+                                        <Typography variant="body2" color="text.secondary" sx={{ display: 'block', fontSize: 12 }}>
+                                            Skor tinggi = kebutuhan air tinggi. Digunakan untuk alokasi air panen.
+                                        </Typography>
                                     </Box>
-                                </Box>
-                                <Box>
-                                    <Typography variant="caption" fontWeight={700} sx={{ display: 'block', lineHeight: 1.1 }}>Harvey Score</Typography>
-                                    <Typography variant="caption" color="text.secondary" sx={{ fontSize: 10 }}>Rata-rata</Typography>
-                                </Box>
-                            </Stack>
+                                </Popover>
+                            </>
                         )}
                     </Box>
 
